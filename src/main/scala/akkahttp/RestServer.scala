@@ -1,4 +1,4 @@
-package version1
+package akkahttp
 
 /**
   * Created by Nikita on 06.10.2017.
@@ -10,7 +10,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import version1.DomainEntitiesJsonFormats._
+import akkahttp.DomainEntitiesJsonFormats._
 
 import scala.io.StdIn
 

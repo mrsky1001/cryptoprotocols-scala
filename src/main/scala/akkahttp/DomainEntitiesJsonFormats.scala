@@ -1,4 +1,4 @@
-package version1
+package akkahttp
 
 /**
   * Created by Nikita on 06.10.2017.

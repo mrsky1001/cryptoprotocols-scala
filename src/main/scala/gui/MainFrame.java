@@ -7,6 +7,8 @@ import network.Protocol;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 public class MainFrame extends JFrame {
     private JPanel mainPanel;
@@ -31,11 +33,9 @@ public class MainFrame extends JFrame {
     private JButton inputMessageButton;
     private User user;
 
-    //===========================
     private int sessionKey;
     private boolean isConnected;
     Client client;
-    Client server;
 
     public MainFrame() {
         setContentPane(mainPanel);
@@ -73,11 +73,15 @@ public class MainFrame extends JFrame {
             connectionButton.setEnabled(false);
             addMessage(user.login() + " connection...");
             if (user.login().equalsIgnoreCase("trent")) {
-                server = Protocol.startServer(Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
+                Protocol.startServer(Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
             } else {
                 client = Protocol.startClient(Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
-                client.sendMesage(user.login());
-                client.sendMesage("Hi!!!!");
+                try {
+                    client.sendMesage(user.login());
+                } catch (NullPointerException exp) {
+                    connectionButton.setEnabled(true);
+                    addMessage("Error, can't connection! \nPlease, try connection again.");
+                }
             }
         }
     }
@@ -92,14 +96,36 @@ public class MainFrame extends JFrame {
         }
     }
 
-    public void addListeners() {
-        ActionListener authorizeActionListener = new authorizeActionListener();
-        ActionListener connectionActionListener = new connectionActionListener();
-        ActionListener enterMessageActionListener = new enterMessageActionListener();
+    public class closedWindowListener implements WindowListener {
+        public void windowClosing(WindowEvent arg0) {
+            Protocol.close();
+            System.exit(0);
+        }
 
-        authorizeButton.addActionListener(authorizeActionListener);
-        connectionButton.addActionListener(connectionActionListener);
-        inputMessageButton.addActionListener(enterMessageActionListener);
+        public void windowOpened(WindowEvent arg0) {
+        }
+
+        public void windowClosed(WindowEvent arg0) {
+        }
+
+        public void windowIconified(WindowEvent arg0) {
+        }
+
+        public void windowDeiconified(WindowEvent arg0) {
+        }
+
+        public void windowActivated(WindowEvent arg0) {
+        }
+
+        public void windowDeactivated(WindowEvent arg0) {
+        }
+    }
+
+    public void addListeners() {
+        authorizeButton.addActionListener(new authorizeActionListener());
+        connectionButton.addActionListener(new connectionActionListener());
+        inputMessageButton.addActionListener(new enterMessageActionListener());
+        this.addWindowListener(new closedWindowListener());
     }
 
     public static void main(String[] args) {

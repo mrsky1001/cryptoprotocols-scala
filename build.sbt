@@ -2,12 +2,10 @@ name := "cryptoprotocols-scala"
 
 version := "1.0"
 
-scalaVersion := "2.12.3"
+scalaVersion := "2.11.8"
 
-libraryDependencies ++= Seq(
+resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-"com.typesafe.akka" %% "akka-http-spray-json" % "10.0.9",
+libraryDependencies += "com.typesafe.akka" % "akka-actor_2.11" % "2.5.6"
 
-"com.typesafe.akka" %% "akka-http" % "10.0.9"
-
-)
+libraryDependencies += "org.scala-lang" % "scala-actors" % "2.11.8"

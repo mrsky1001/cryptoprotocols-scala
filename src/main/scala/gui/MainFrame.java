@@ -5,10 +5,9 @@ import network.Client;
 import network.Protocol_2;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
+
+import static java.awt.event.KeyEvent.VK_ENTER;
 
 public class MainFrame extends JFrame {
     private JPanel mainPanel;
@@ -75,6 +74,7 @@ public class MainFrame extends JFrame {
             addMessage(user.login() + " connection...");
 
             if (user.login().equalsIgnoreCase("trent")) {
+                inputMessageField.setEnabled(false);
                 Protocol_2.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
             } else {
                 client = Protocol_2.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
@@ -128,6 +128,20 @@ public class MainFrame extends JFrame {
         connectionButton.addActionListener(new connectionActionListener());
         inputMessageButton.addActionListener(new enterMessageActionListener());
         this.addWindowListener(new closedWindowListener());
+
+        inputMessageField.addKeyListener(new KeyAdapter() {
+
+            public void keyReleased(KeyEvent e) {
+                if(e.getKeyCode() ==  VK_ENTER){
+                    addMessage(inputMessageField.getText());
+                    if (client != null)
+                        client.sendMessage(inputMessageField.getText());
+                    else
+                        addMessage("Error, Client don't connected!!!");
+                }
+            }
+
+        });
     }
 
     public static void main(String[] args) {

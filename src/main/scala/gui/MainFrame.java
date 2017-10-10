@@ -2,7 +2,7 @@ package gui;
 
 import gui.entity.User;
 import network.Client;
-import network.Protocol;
+import network.Protocol_2;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -75,9 +75,9 @@ public class MainFrame extends JFrame {
             addMessage(user.login() + " connection...");
 
             if (user.login().equalsIgnoreCase("trent")) {
-                Protocol.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
+                Protocol_2.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
             } else {
-                client = Protocol.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
+                client = Protocol_2.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
                 try {
                     client.sendMessage(user.login());
                 } catch (NullPointerException exp) {
@@ -100,7 +100,7 @@ public class MainFrame extends JFrame {
 
     public class closedWindowListener implements WindowListener {
         public void windowClosing(WindowEvent arg0) {
-            Protocol.close();
+            Protocol_2.close();
             System.exit(0);
         }
 

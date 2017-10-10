@@ -12,12 +12,13 @@ import scala.collection.mutable
 /**
   * Created by user on 07.10.2017.
   */
-object Protocol {
+object Protocol_2 {
 
   case class Session(id: String, sock: Socket, is: BufferedReader, ps: PrintStream, loginUser: String)
 
   val first = "bob"
   val second = "alice"
+  val third = "trent"
   var messagesPane: JTextPane = _
   val sessions = new mutable.ArrayBuffer[Session] with mutable.SynchronizedBuffer[Session]
 
@@ -70,12 +71,12 @@ object Protocol {
                   val message = source.is.readLine()
                   val sourceName = "<" + source.loginUser + ">"
 
-                  if (message.contains("[alice]"))
-                    sessions(0).ps.println(message.replace("[alice]", sourceName))
-                  else if (message.contains("[bob]"))
-                    sessions(1).ps.println(message.replace("[bob]", sourceName))
-                  else if (message.contains("[trent]"))
-                    addMessage(message.replace("[trent]", sourceName))
+                  if (message.contains("["+first+"]"))
+                    sessions(0).ps.println(message.replace("["+first+"]", sourceName))
+                  else if (message.contains("["+second+"]"))
+                    sessions(1).ps.println(message.replace("["+second+"]", sourceName))
+                  else if (message.contains("["+third+"]"))
+                    addMessage(message.replace("["+third+"]", sourceName))
                 }
               }
               catch {
@@ -84,7 +85,7 @@ object Protocol {
             }
         }
       }
-      Server.start(sessions, first, second, port, backlog, address)
+      Server.start(sessions, first, second, third, port, backlog, address)
       null
     }
   }

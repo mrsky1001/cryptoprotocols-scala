@@ -4,7 +4,7 @@ import java.io.{BufferedReader, InputStreamReader, PrintStream}
 import java.net.{ConnectException, InetAddress, Socket}
 
 import gui.entity.User
-import network.Protocol.Session
+import network.Protocol_2.Session
 
 import scala.actors.Actor._
 import scala.collection.mutable

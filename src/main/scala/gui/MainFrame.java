@@ -3,14 +3,12 @@ package gui;
 import gui.entity.User;
 import network.Client;
 import network.Protocol;
-import scala.Option;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.Optional;
 
 public class MainFrame extends JFrame {
     private JPanel mainPanel;
@@ -72,14 +70,16 @@ public class MainFrame extends JFrame {
                 messagesPane.setText("Please first sign in!");
                 return;
             }
+
             connectionButton.setEnabled(false);
             addMessage(user.login() + " connection...");
+
             if (user.login().equalsIgnoreCase("trent")) {
-                Protocol.startServer(Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
+                Protocol.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
             } else {
-                client = Protocol.startClient(Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
+                client = Protocol.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
                 try {
-                    client.sendMesage(user.login());
+                    client.sendMessage(user.login());
                 } catch (NullPointerException exp) {
                     connectionButton.setEnabled(true);
                     addMessage("Error, can't connection! \nPlease, try connection again.");
@@ -92,7 +92,7 @@ public class MainFrame extends JFrame {
         public void actionPerformed(ActionEvent e) {
             addMessage(inputMessageField.getText());
             if (client != null)
-                client.sendMesage(inputMessageField.getText());
+                client.sendMessage(inputMessageField.getText());
             else
                 addMessage("Error, Client don't connected!!!");
         }

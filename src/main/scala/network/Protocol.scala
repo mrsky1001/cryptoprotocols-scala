@@ -4,6 +4,8 @@ import java.io.{BufferedReader, IOException, PrintStream}
 import java.net.Socket
 import javax.swing.JTextPane
 
+import gui.entity.User
+
 import scala.actors.Actor._
 import scala.collection.mutable
 
@@ -12,8 +14,10 @@ import scala.collection.mutable
   */
 object Protocol {
 
-  case class Session(sock: Socket, is: BufferedReader, ps: PrintStream, name: String)
+  case class Session(id: String, sock: Socket, is: BufferedReader, ps: PrintStream, loginUser: String)
 
+  val first = "bob"
+  val second = "alice"
   var messagesPane: JTextPane = _
   val sessions = new mutable.ArrayBuffer[Session] with mutable.SynchronizedBuffer[Session]
 
@@ -24,18 +28,19 @@ object Protocol {
       println("Error, messagesPane = null!!!")
   }
 
-  def startClient(port: Int, backlog: Int, address: String, messagesPane: JTextPane): Client = {
+  def startClient(user: User, port: Int, backlog: Int, address: String, messagesPane: JTextPane): Client = {
     this.messagesPane = messagesPane
-    start(whoami = false, port, backlog, address)
+    start(whoami = false, user, port, backlog, address)
   }
 
-  def startServer(port: Int, backlog: Int, address: String, messagesPane: JTextPane): Client = {
+  def startServer(user: User, port: Int, backlog: Int, address: String, messagesPane: JTextPane): Client = {
     this.messagesPane = messagesPane
-    start(whoami = true, port, backlog, address)
+    start(whoami = true, user, port, backlog, address)
   }
 
-  def start(whoami: Boolean, port: Int, backlog: Int, address: String): Client = {
-    if (!whoami) {//client
+  def start(whoami: Boolean, user: User, port: Int, backlog: Int, address: String): Client = {
+    if (!whoami) {
+      //client
       actor {
         while (true) {
           for (session <- sessions) {
@@ -54,22 +59,23 @@ object Protocol {
       Connection.start(sessions, port, backlog, address)
     }
     else {
-      actor {//server
+      actor {
+        //server
         while (true) {
           if (sessions.size > 1)
             for (source <- sessions) {
 
               try {
                 if (source.is.ready) {
-                  val input = source.is.readLine()
-                  val message = source.name + ": " + input
+                  val message = source.is.readLine()
+                  val sourceName = "<" + source.loginUser + ">"
 
                   if (message.contains("[alice]"))
-                    sessions.find(s => s.name.equalsIgnoreCase("alice")).get.ps.println(message.replace("[alice]", ""))
+                    sessions(0).ps.println(message.replace("[alice]", sourceName))
                   else if (message.contains("[bob]"))
-                    sessions.find(s => s.name.equalsIgnoreCase("bob")).get.ps.println(message.replace("[bob]", ""))
+                    sessions(1).ps.println(message.replace("[bob]", sourceName))
                   else if (message.contains("[trent]"))
-                    addMessage(message.replace("[trent]", ""))
+                    addMessage(message.replace("[trent]", sourceName))
                 }
               }
               catch {
@@ -78,7 +84,7 @@ object Protocol {
             }
         }
       }
-      Server.start(sessions, port, backlog, address)
+      Server.start(sessions, first, second, port, backlog, address)
       null
     }
   }

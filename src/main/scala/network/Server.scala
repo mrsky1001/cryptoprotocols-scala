@@ -2,10 +2,7 @@ package network
 
 import java.io.{BufferedReader, InputStreamReader, PrintStream}
 import java.net.{InetAddress, ServerSocket}
-
-import gui.entity.User
-import network.Protocol_2.Session
-
+import entity.{Session, User}
 import scala.actors.Actor.actor
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -22,9 +19,10 @@ object Server {
         val socket = serverSocket.accept()
         val is = new BufferedReader(new InputStreamReader(socket.getInputStream))
         val os = new PrintStream(socket.getOutputStream)
-        val idClient = if (sessions.nonEmpty && sessions.size % 2 == 1) first else second
+        val idClient = if (sessions.nonEmpty) second else first//&& sessions.size % 2 == 0
         actors.Actor.actor {
-          os.println(third)
+          os.println("[num] = " + idClient)
+          os.println("[iam] = " + third)
           sessions += Session(idClient, socket, is, os, is.readLine())
         }
       }

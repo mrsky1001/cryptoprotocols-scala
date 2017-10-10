@@ -1,8 +1,8 @@
 package gui;
 
-import gui.entity.User;
+import entity.User;
 import network.Client;
-import network.Protocol_2;
+import network.Protocol_2Relesed;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -35,7 +35,7 @@ public class MainFrame extends JFrame {
     private int sessionKey;
     private boolean isConnected;
     Client client;
-
+    MainFrame mainFrame;
     public MainFrame() {
         setContentPane(mainPanel);
         setVisible(true);
@@ -52,11 +52,11 @@ public class MainFrame extends JFrame {
     public class authorizeActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if (user != null)
-                addMessage("Goodbye, " + user.login() + "!!!");
+                addMessage("Goodbye, " + user.getLogin() + "!!!");
 
             user = new User(loginField.getText(), passwordField.getText());
-            addMessage("Welcome, " + user.login() + "!!!");
-            if (user.login().equalsIgnoreCase("trent")) {
+            addMessage("Welcome, " + user.getLogin() + "!!!");
+            if (user.getLogin().equalsIgnoreCase("trent")) {
                 inputMessageButton.setEnabled(false);
             }
             authorizeButton.setEnabled(false);
@@ -71,16 +71,15 @@ public class MainFrame extends JFrame {
             }
 
             connectionButton.setEnabled(false);
-            addMessage(user.login() + " connection...");
+            addMessage(user.getLogin() + " connection...");
 
-            if (user.login().equalsIgnoreCase("trent")) {
+            if (user.getLogin().equalsIgnoreCase("trent")) {
                 inputMessageField.setEnabled(false);
-                Protocol_2.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
+                Protocol_2Relesed.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
             } else {
-                client = Protocol_2.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane);
                 try {
-                    client.sendMessage(user.login());
-                } catch (NullPointerException exp) {
+                    client = Protocol_2Relesed.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
+                } catch (NullPointerException excp) {
                     connectionButton.setEnabled(true);
                     addMessage("Error, can't connection! \nPlease, try connection again.");
                 }
@@ -88,8 +87,8 @@ public class MainFrame extends JFrame {
         }
     }
 
-    public class enterMessageActionListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
+    private void sendMessage() {
+        if (user != null && user.sessionKey() != 0) {
             addMessage(inputMessageField.getText());
             if (client != null)
                 client.sendMessage(inputMessageField.getText());
@@ -98,10 +97,16 @@ public class MainFrame extends JFrame {
         }
     }
 
+    public class enterMessageActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            sendMessage();
+        }
+    }
+
     public class closedWindowListener implements WindowListener {
         public void windowClosing(WindowEvent arg0) {
-            Protocol_2.close();
-            System.exit(0);
+            //Protocol_2Relesed.close();
+            dispose();
         }
 
         public void windowOpened(WindowEvent arg0) {
@@ -124,6 +129,7 @@ public class MainFrame extends JFrame {
     }
 
     public void addListeners() {
+        mainFrame = this;
         authorizeButton.addActionListener(new authorizeActionListener());
         connectionButton.addActionListener(new connectionActionListener());
         inputMessageButton.addActionListener(new enterMessageActionListener());
@@ -132,12 +138,8 @@ public class MainFrame extends JFrame {
         inputMessageField.addKeyListener(new KeyAdapter() {
 
             public void keyReleased(KeyEvent e) {
-                if(e.getKeyCode() ==  VK_ENTER){
-                    addMessage(inputMessageField.getText());
-                    if (client != null)
-                        client.sendMessage(inputMessageField.getText());
-                    else
-                        addMessage("Error, Client don't connected!!!");
+                if (e.getKeyCode() == VK_ENTER) {
+                    sendMessage();
                 }
             }
 

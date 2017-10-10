@@ -24,16 +24,6 @@ object Protocol {
       println("Error, messagesPane = null!!!")
   }
 
-  def startOptionClient(messagePane: JTextPane): Client = {
-    this.messagesPane = messagesPane
-    start(whoami = false)
-  }
-
-  def startOptionServer(messagePane: JTextPane): Client = {
-    this.messagesPane = messagesPane
-    start(whoami = true)
-  }
-
   def startClient(port: Int, backlog: Int, address: String, messagesPane: JTextPane): Client = {
     this.messagesPane = messagesPane
     start(whoami = false, port, backlog, address)
@@ -44,8 +34,8 @@ object Protocol {
     start(whoami = true, port, backlog, address)
   }
 
-  def start(whoami: Boolean, port: Int = 8080, backlog: Int = 3, address: String = "localhost"): Client = {
-    if (!whoami) {
+  def start(whoami: Boolean, port: Int, backlog: Int, address: String): Client = {
+    if (!whoami) {//client
       actor {
         while (true) {
           for (session <- sessions) {
@@ -64,7 +54,7 @@ object Protocol {
       Connection.start(sessions, port, backlog, address)
     }
     else {
-      actor {
+      actor {//server
         while (true) {
           if (sessions.size > 1)
             for (source <- sessions) {

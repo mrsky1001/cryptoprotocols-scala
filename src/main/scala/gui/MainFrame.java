@@ -3,12 +3,14 @@ package gui;
 import gui.entity.User;
 import network.Client;
 import network.Protocol;
+import scala.Option;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.Optional;
 
 public class MainFrame extends JFrame {
     private JPanel mainPanel;

@@ -1,8 +1,10 @@
 package gui;
 
+import algorithms.Gamma;
+import algorithms.GammaJava;
 import entity.User;
 import network.Client;
-import network.Protocol_2Relesed;
+import network.ProtocolWideMouthFrog;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -75,10 +77,10 @@ public class MainFrame extends JFrame {
 
             if (user.getLogin().equalsIgnoreCase("trent")) {
                 inputMessageField.setEnabled(false);
-                Protocol_2Relesed.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
+                ProtocolWideMouthFrog.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
             } else {
                 try {
-                    client = Protocol_2Relesed.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
+                    client = ProtocolWideMouthFrog.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
                 } catch (NullPointerException excp) {
                     connectionButton.setEnabled(true);
                     addMessage("Error, can't connection! \nPlease, try connection again.");
@@ -90,6 +92,8 @@ public class MainFrame extends JFrame {
     private void sendMessage() {
         if (user != null && user.sessionKey() != 0) {
             addMessage(inputMessageField.getText());
+            byte[] message = new GammaJava().encrypt(inputMessageField.getText(), user.sessionKey());
+            addMessage(message);
             if (client != null)
                 client.sendMessage(inputMessageField.getText());
             else

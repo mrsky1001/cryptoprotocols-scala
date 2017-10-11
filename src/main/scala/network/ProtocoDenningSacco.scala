@@ -1,4 +1,4 @@
-package network
+package protocols
 
 import java.io.IOException
 import java.math.BigInteger
@@ -7,6 +7,7 @@ import javax.swing.JTextPane
 
 import algorithms.RSAJava
 import entity.{Session, User}
+import network.{Client, Connection, Server}
 
 import scala.actors.Actor._
 import scala.collection.mutable
@@ -14,10 +15,10 @@ import scala.collection.mutable
 /**
   * Created by user on 07.10.2017.
   */
-object Protocol_2Relesed {
+object ProtocoDenningSacco {
 
-  val first = "bob"
-  val second = "alice"
+  val first = "alice"
+  val second = "bob"
   val third = "trent"
   var messagesPane: JTextPane = _
   var mainForm: gui.MainFrame = _
@@ -26,8 +27,13 @@ object Protocol_2Relesed {
   val sizePQ: Int = 5
   var rsa: RSAJava = new RSAJava(sizePQ)
 
+  var secretKey = 0
   var openKey = 0
   var sessionKey = 0
+
+  def generateSecretKey(): Unit = {
+    secretKey = rsa.getD.intValue()
+  }
 
   def generateOpenKey: String = {
     openKey = rsa.getN.intValue
@@ -56,7 +62,7 @@ object Protocol_2Relesed {
 
   def encrypt(key: Int): String = rsa.encrypt(key)
 
-  def decrypt(str: String, jTextPane: JTextPane): Int = rsa.decrypt(new BigInteger(str), jTextPane)
+  def decrypt(str: String, jTextPane: JTextPane): Int = rsa.decrypt(new BigInteger(str), messagesPane)
 
   def addMessage(message: String): Unit = {
     if (messagesPane != null)
@@ -133,10 +139,10 @@ object Protocol_2Relesed {
           }
         }
       }
-      val client = Connection.start(sessions, port, backlog, address)
+      val client = Connection.start(sessions, first, second, port, backlog, address)
       sessions(0).ps.println(user.getLogin)
 
-      if (client.getId.equals(first)) { //if bob
+      if (client.getId.equals(first)) { //if alice
         addMessage(user.getLogin + "=> generateOpenKey")
         sessions(0).ps.println("[" + third + "][openKey]" + generateOpenKey)
         addMessage(openKey.toString)
@@ -155,12 +161,12 @@ object Protocol_2Relesed {
               try {
                 if (source.is.ready) {
                   val message = source.is.readLine()
-                  val sourceName = "<" + source.loginUser + ">"
+                  val sourceName = "<" + source.id + ">" //change
                   //0 - bob, 1 - alice, x - trent
                   if (message.contains("[" + first + "]")) {
                     sessions(0).ps.println(message.replace("[" + first + "]", sourceName))
                     if (message.contains("[encryptedKey]"))
-                        mainForm.dispose()
+                      mainForm.dispose()
                   }
                   else if (message.contains("[" + second + "]"))
                     sessions(1).ps.println(message.replace("[" + second + "]", sourceName))

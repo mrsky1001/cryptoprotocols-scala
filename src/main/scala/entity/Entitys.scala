@@ -6,20 +6,8 @@ import java.net.Socket
 /**
   * Created by user on 07.10.2017.
   */
-class User(login: String, password: String) {
-  var sessionKey: Int = 0
+case class User(login: String, password: String, access: Boolean)
 
-  def getLogin: String = {
-    login
-  }
+case class NamesSession(first: String, second: String, third: String)
 
-  def getPassword: String = {
-    password
-  }
-
-  def setSessionKey(sessionKey: Int): Unit = {
-    this.sessionKey = sessionKey
-  }
-}
-
-case class Session(id: String, sock: Socket, is: BufferedReader, ps: PrintStream, loginUser: String)
+case class Session(nameSession: String, num: String, sock: Socket, is: BufferedReader, ps: PrintStream, sessionKey: Option[Int] = None)

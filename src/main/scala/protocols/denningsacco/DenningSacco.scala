@@ -1,13 +1,12 @@
-package protocols
+package protocols.denningsacco
 
 import java.io.IOException
-import java.math.BigInteger
-import java.security.SecureRandom
 import javax.swing.JTextPane
 
-import algorithms.RSAJava
+import algorithms.rsa.RSAManager
 import entity.{Session, User}
 import network.{Client, Connection, Server}
+import protocols.denningsacco.NumberStart.NumberStart
 
 import scala.actors.Actor._
 import scala.collection.mutable
@@ -15,54 +14,13 @@ import scala.collection.mutable
 /**
   * Created by user on 07.10.2017.
   */
-object ProtocoDenningSacco {
+object DenningSacco {
 
-  val first = "alice"
-  val second = "bob"
-  val third = "trent"
+  val numberStart: NumberStart
   var messagesPane: JTextPane = _
   var mainForm: gui.MainFrame = _
   val sessions = new mutable.ArrayBuffer[Session] with mutable.SynchronizedBuffer[Session]
-
-  val sizePQ: Int = 5
-  var rsa: RSAJava = new RSAJava(sizePQ)
-
-  var secretKey = 0
-  var openKey = 0
-  var sessionKey = 0
-
-  def generateSecretKey(): Unit = {
-    secretKey = rsa.getD.intValue()
-  }
-
-  def generateOpenKey: String = {
-    openKey = rsa.getN.intValue
-    rsa.getE.toString + "n:" + rsa.getN.toString + "p:" + rsa.getP.toString + "q:" + rsa.getQ
-  }
-
-  def generateSessionKey(): Unit = {
-    sessionKey = new SecureRandom().nextInt(openKey - 10) + 1
-  }
-
-  def setOpenKey(message: String, textPane: JTextPane): Unit = {
-    val indexN = message.indexOf("n:")
-    val indexP = message.indexOf("p:")
-    val indexQ = message.indexOf("q:")
-
-    val e = new BigInteger(message.substring(0, indexN))
-    val n = new BigInteger(message.substring(indexN + 2, indexP))
-    val p = new BigInteger(message.substring(indexP + 2, indexQ))
-    val q = new BigInteger(message.substring(indexQ + 2))
-
-    System.out.println("e, n, p ,q ")
-    System.out.println(e + " " + n + " " + p + " " + q)
-    rsa = new RSAJava(sizePQ, e, n, p, q, textPane)
-    openKey = n.intValue
-  }
-
-  def encrypt(key: Int): String = rsa.encrypt(key)
-
-  def decrypt(str: String, jTextPane: JTextPane): Int = rsa.decrypt(new BigInteger(str), messagesPane)
+  val rsaManager = new RSAManager
 
   def addMessage(message: String): Unit = {
     if (messagesPane != null)
@@ -82,6 +40,8 @@ object ProtocoDenningSacco {
     this.mainForm = mainForm
     start(whoami = true, user, port, backlog, address)
   }
+
+  /////////////////////////////////////////////////////////////////
 
   def start(whoami: Boolean, user: User, port: Int, backlog: Int, address: String): Client = {
     if (!whoami) {
@@ -139,16 +99,16 @@ object ProtocoDenningSacco {
           }
         }
       }
-      val client = Connection.start(sessions, first, second, port, backlog, address)
+
+      val client = Connection.start(sessions, user, port, backlog, address)
       sessions(0).ps.println(user.getLogin)
 
-      if (client.getId.equals(first)) { //if alice
+      if (first)
         addMessage(user.getLogin + "=> generateOpenKey")
-        sessions(0).ps.println("[" + third + "][openKey]" + generateOpenKey)
-        addMessage(openKey.toString)
-        addMessage(user.getLogin + "=> send open key to " + third)
+      sessions(0).ps.println("[" + third + "][openKey]" + generateOpenKey)
+      addMessage(openKey.toString)
+      addMessage(user.getLogin + "=> send open key to " + third)
 
-      }
       client
     }
     else {

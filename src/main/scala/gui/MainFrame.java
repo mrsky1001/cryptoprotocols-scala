@@ -1,7 +1,8 @@
 package gui;
 
 import algorithms.Gamma;
-import algorithms.GammaJava;
+import algorithms.gamma.GammaJava;
+import entity.ChoiceProtocol;
 import entity.User;
 import network.Client;
 import network.ProtocolWideMouthFrog;
@@ -33,11 +34,10 @@ public class MainFrame extends JFrame {
     private JTextField inputMessageField;
     private JButton inputMessageButton;
     private User user;
-
-    private int sessionKey;
-    private boolean isConnected;
-    Client client;
     MainFrame mainFrame;
+
+    Client client;
+
     public MainFrame() {
         setContentPane(mainPanel);
         setVisible(true);
@@ -54,11 +54,11 @@ public class MainFrame extends JFrame {
     public class authorizeActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if (user != null)
-                addMessage("Goodbye, " + user.getLogin() + "!!!");
+                addMessage("Goodbye, " + user.login() + "!!!");
 
-            user = new User(loginField.getText(), passwordField.getText());
-            addMessage("Welcome, " + user.getLogin() + "!!!");
-            if (user.getLogin().equalsIgnoreCase("trent")) {
+            user = new User(loginField.getText(), passwordField.getText(), false);
+            addMessage("Welcome, " + user.login() + "!!!");
+            if (user.login().equalsIgnoreCase("trent")) {
                 inputMessageButton.setEnabled(false);
             }
             authorizeButton.setEnabled(false);
@@ -73,9 +73,9 @@ public class MainFrame extends JFrame {
             }
 
             connectionButton.setEnabled(false);
-            addMessage(user.getLogin() + " connection...");
+            addMessage(user.login() + " connection...");
 
-            if (user.getLogin().equalsIgnoreCase("trent")) {
+            if (user.login().equalsIgnoreCase("trent")) {
                 inputMessageField.setEnabled(false);
                 ProtocolWideMouthFrog.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
             } else {

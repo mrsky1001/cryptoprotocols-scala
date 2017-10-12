@@ -1,11 +1,13 @@
 //package protocols
 //
 //import java.io.IOException
+//import java.math.BigInteger
 //import java.security.SecureRandom
 //import javax.swing.JTextPane
 //
-//import algorithms.GammaJava
+//import algorithms.rsa.RSAJava
 //import entity.{Session, User}
+//import network.{Client, Connection, Server}
 //
 //import scala.actors.Actor._
 //import scala.collection.mutable
@@ -13,29 +15,56 @@
 ///**
 //  * Created by user on 07.10.2017.
 //  */
-//object ProtocolWideMouthFrog {
+//object Protocol_2Relesed {
 //
-//  val first = "A"
-//  val second = "B"
-//  val third = "T"
-//  val Ka = 17
-//  val Kb = 59
+//  val first = "bob"
+//  val second = "alice"
+//  val third = "trent"
 //  var messagesPane: JTextPane = _
 //  var mainForm: gui.MainFrame = _
 //  val sessions = new mutable.ArrayBuffer[Session] with mutable.SynchronizedBuffer[Session]
+//
+//  val sizePQ: Int = 5
+//  var rsa: RSAJava = new RSAJava(sizePQ)
+//
+//  var openKey = 0
 //  var sessionKey = 0
-//  val format = new java.text.SimpleDateFormat("dd-MM-yyyy")
+//
+//  def generateOpenKey: String = {
+//    openKey = rsa.getN.intValue
+//    rsa.getE.toString + "n:" + rsa.getN.toString + "p:" + rsa.getP.toString + "q:" + rsa.getQ
+//  }
 //
 //  def generateSessionKey(): Unit = {
-//    sessionKey = new SecureRandom().nextInt(500 - 10) + 1
+//    sessionKey = new SecureRandom().nextInt(openKey - 10) + 1
 //  }
+//
+//  def setOpenKey(message: String, textPane: JTextPane): Unit = {
+//    val indexN = message.indexOf("n:")
+//    val indexP = message.indexOf("p:")
+//    val indexQ = message.indexOf("q:")
+//
+//    val e = new BigInteger(message.substring(0, indexN))
+//    val n = new BigInteger(message.substring(indexN + 2, indexP))
+//    val p = new BigInteger(message.substring(indexP + 2, indexQ))
+//    val q = new BigInteger(message.substring(indexQ + 2))
+//
+//    System.out.println("e, n, p ,q ")
+//    System.out.println(e + " " + n + " " + p + " " + q)
+//    rsa = new RSAJava(sizePQ, e, n, p, q, textPane)
+//    openKey = n.intValue
+//  }
+//
+//  def encrypt(key: Int): String = rsa.encrypt(key)
+//
+//  def decrypt(str: String, jTextPane: JTextPane): Int = rsa.decrypt(new BigInteger(str), jTextPane)
 //
 //  def addMessage(message: String): Unit = {
 //    if (messagesPane != null)
 //      messagesPane.setText(messagesPane.getText + "\n" + message)
 //    else
 //      println("Error, messagesPane = null!!!")
-////  }
+//  }
 //
 //  def startClient(user: User, port: Int, backlog: Int, address: String, messagesPane: JTextPane, mainForm: gui.MainFrame): Client = {
 //    this.messagesPane = messagesPane
@@ -58,26 +87,40 @@
 //            try {
 //              if (session.is.ready) {
 //                val message = session.is.readLine()
-//                val sessionName = "<" + session.id + ">"
+//                val sessionName = "<" + session.loginUser + ">"
 //
 //                if (message.contains("<" + third + ">")) { //if get from trent
-//                  if (message.contains("[encryptedKey]")) {
-//                    val decryptedMes = session.is.readLine()
-//                    addMessage(user.getLogin + "=> get encrypted mes from " + sessionName)
-//                    addMessage(user.getLogin + "=> decrypt mes ")
+//                  if (message.contains("[openKey]")) {
+//                    addMessage(user.getLogin + "=> get open key from " + sessionName)
+//                    setOpenKey(message.substring(("<" + third + ">[openKey]").length), messagesPane)
 //
-//                    new GammaJava().decrypt(message.substring(("<" + third + ">[encryptedKey]").length).getBytes(), Kb)
-//                    addMessage(decryptedMes)
-//
-//                    sessionKey = Integer.parseInt(decryptedMes.substring(35))
+//                    generateSessionKey()
 //                    user.sessionKey = sessionKey
-//                    addMessage(user.getLogin + "=> sessionKey ")
+//                    addMessage(user.getLogin + "=> generateSessionKey")
+//
 //                    addMessage(sessionKey.toString)
+//                    addMessage(user.getLogin + "=> encryptSessionKey")
+//
+//                    val encryptedKey = encrypt(sessionKey)
+//                    addMessage(encryptedKey)
+//
+//                    addMessage(user.getLogin + "=> sendSessionKey to bob")
+//                    session.ps.println("[" + first + "][encryptedKey]" + encryptedKey)
 //                  }
 //
 //                }
 //                else if (message.contains("<" + second + ">")) { //if get from alice
-//                  addMessage(message)
+//                  if (message.contains("[encryptedKey]")) {
+//                    addMessage(user.getLogin + "=> get encryptedKey from " + sessionName)
+//
+//                    sessionKey = decrypt(message.substring(("<" + second + ">[encryptedKey]").length), messagesPane)
+//                    user.sessionKey = sessionKey
+//                    addMessage(user.getLogin + "=> decrypt SessionKey")
+//                    addMessage(sessionKey.toString)
+//
+//                  }
+//                  else
+//                    addMessage(message)
 //
 //                }
 //                else if (message.contains("<" + first + ">")) {
@@ -94,19 +137,12 @@
 //      val client = Connection.start(sessions, first, second, port, backlog, address)
 //      sessions(0).ps.println(user.getLogin)
 //
-//      if (client.getId.equals(first)) {
-//        //alice
-//        addMessage(user.getLogin + "=> generateSessionKey")
-//        generateSessionKey()
-//        user.sessionKey = sessionKey
-//        addMessage(sessionKey.toString)
-//        val Ta = new java.util.Date()
-//        val mesA = Ta + second + sessionKey
-//        addMessage(mesA)
-//        addMessage(user.getLogin + "=> Encrypt(concatenation markTime +" + second + " + sessionKey)")
-//        sessions(0).ps.println("[" + third + "][encryptedKey]" + first + new GammaJava().encrypt(mesA, Ka));
-//        sessions(0).ps.println(Ta + second + sessionKey)
-//        addMessage(user.getLogin + "=> send marks to " + third)
+//      if (client.getId.equals(first)) { //if bob
+//        addMessage(user.getLogin + "=> generateOpenKey")
+//        sessions(0).ps.println("[" + third + "][openKey]" + generateOpenKey)
+//        addMessage(openKey.toString)
+//        addMessage(user.getLogin + "=> send open key to " + third)
+//
 //      }
 //      client
 //    }
@@ -119,32 +155,21 @@
 //
 //              try {
 //                if (source.is.ready) {
-//
 //                  val message = source.is.readLine()
-//                  new GammaJava().encrypt(message, user.sessionKey)
-//                  val sourceName = "<" + source.id + ">"
-//                  //0 - alice, 1 - bob, x - trent
+//                  val sourceName = "<" + source.id + ">"//change
+//                  //0 - bob, 1 - alice, x - trent
 //                  if (message.contains("[" + first + "]")) {
 //                    sessions(0).ps.println(message.replace("[" + first + "]", sourceName))
+//                    if (message.contains("[encryptedKey]"))
+//                        mainForm.dispose()
 //                  }
 //                  else if (message.contains("[" + second + "]"))
 //                    sessions(1).ps.println(message.replace("[" + second + "]", sourceName))
 //                  else if (message.contains("[" + third + "]")) {
-//                    if (message.contains("[encryptedKey]")) {
-//                      val decryptedMes = source.is.readLine()
-//                      addMessage(user.getLogin + "=> get encrypted mes from " + sourceName)
-//                      addMessage(user.getLogin + "=> decrypt mes ")
-//                      new GammaJava().decrypt(message.substring(("<" + third + ">[encryptedKey]" + first).length).getBytes(), Ka)
-//                      addMessage(first + decryptedMes)
-//                      val sessionKey = decryptedMes.substring(35)
-//                      val Tb = new java.util.Date()
-//                      val mesT = Tb + first + sessionKey
-//                      addMessage(mesT)
-//                      addMessage(user.getLogin + "=> Encrypt(concatenation markTime + " + first + " + sessionKey)")
-//                      sessions(1).ps.println("<" + third + ">[encryptedKey]" + new GammaJava().encrypt(mesT, Kb).toString);
-//                      sessions(1).ps.println(Tb + second + sessionKey)
-//                      addMessage(user.getLogin + "=> send marks to " + second)
-//                      mainForm.dispose()
+//                    if (message.contains("[openKey]")) {
+//                      addMessage(user.getLogin + "=> get open key from " + sourceName)
+//                      addMessage(user.getLogin + "=> send open key to " + second)
+//                      sessions(1).ps.println(message.replace("[" + third + "]", "<" + third + ">")) //send bob
 //                    }
 //                  }
 //                }

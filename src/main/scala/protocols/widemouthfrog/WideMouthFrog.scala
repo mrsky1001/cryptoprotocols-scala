@@ -1,11 +1,12 @@
-package network
+package protocols.widemouthfrog
 
 import java.io.IOException
 import java.security.SecureRandom
 import javax.swing.JTextPane
 
-import algorithms.GammaJava
+import algorithms.gamma.GammaJava
 import entity.{Session, User}
+import network.{Client, Connection, Server}
 
 import scala.actors.Actor._
 import scala.collection.mutable
@@ -13,7 +14,7 @@ import scala.collection.mutable
 /**
   * Created by user on 07.10.2017.
   */
-object ProtocolWideMouthFrog {
+object WideMouthFrog {
 
   val first = "A"
   val second = "B"

@@ -1,4 +1,4 @@
-package protocols
+package protocols.protocol2
 
 import java.io.IOException
 import javax.swing.JTextPane

@@ -1,4 +1,4 @@
-package algorithms;
+package algorithms.gamma;
 
 /**
  * Created by user on 12.09.2017.

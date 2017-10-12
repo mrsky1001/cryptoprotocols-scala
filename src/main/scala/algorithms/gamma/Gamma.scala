@@ -1,4 +1,4 @@
-package algorithms
+package algorithms.gamma
 
 object Gamma {
   private val A = 3

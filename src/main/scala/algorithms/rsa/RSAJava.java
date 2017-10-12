@@ -1,4 +1,4 @@
-package algorithms;
+package algorithms.rsa;
 
 import javax.swing.*;
 import java.math.BigInteger;

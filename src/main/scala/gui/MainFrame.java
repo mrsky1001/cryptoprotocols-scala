@@ -1,11 +1,9 @@
 package gui;
 
-import algorithms.Gamma;
 import algorithms.gamma.GammaJava;
-import entity.ChoiceProtocol;
 import entity.User;
 import network.Client;
-import network.ProtocolWideMouthFrog;
+import protocols.denningsacco.DenningSacco;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -56,7 +54,7 @@ public class MainFrame extends JFrame {
             if (user != null)
                 addMessage("Goodbye, " + user.login() + "!!!");
 
-            user = new User(loginField.getText(), passwordField.getText(), false);
+            user = new User(loginField.getText(), passwordField.getText());
             addMessage("Welcome, " + user.login() + "!!!");
             if (user.login().equalsIgnoreCase("trent")) {
                 inputMessageButton.setEnabled(false);
@@ -77,10 +75,10 @@ public class MainFrame extends JFrame {
 
             if (user.login().equalsIgnoreCase("trent")) {
                 inputMessageField.setEnabled(false);
-                ProtocolWideMouthFrog.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
+                DenningSacco.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
             } else {
                 try {
-                    client = ProtocolWideMouthFrog.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
+                    client = DenningSacco.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
                 } catch (NullPointerException excp) {
                     connectionButton.setEnabled(true);
                     addMessage("Error, can't connection! \nPlease, try connection again.");
@@ -90,10 +88,8 @@ public class MainFrame extends JFrame {
     }
 
     private void sendMessage() {
-        if (user != null && user.sessionKey() != 0) {
+        if (user != null && user.access()) {
             addMessage(inputMessageField.getText());
-            byte[] message = new GammaJava().encrypt(inputMessageField.getText(), user.sessionKey());
-            addMessage(message);
             if (client != null)
                 client.sendMessage(inputMessageField.getText());
             else

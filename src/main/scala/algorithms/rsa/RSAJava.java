@@ -1,6 +1,5 @@
 package algorithms.rsa;
 
-import javax.swing.*;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -37,12 +36,6 @@ public class RSAJava {
         return d;
     }
 
-    public JTextPane jTextPane;
-
-    public void addMessage(Object message) {
-        jTextPane.setText(jTextPane.getText() + "\n" + message);
-    }
-
     public RSAJava(Integer sizePQ) {
         this.sizePQ = sizePQ;
 
@@ -56,15 +49,13 @@ public class RSAJava {
         this.d = generateD(n1);
     }
 
-    public RSAJava(Integer sizePQ, BigInteger e, BigInteger n, BigInteger p, BigInteger q, JTextPane jTextPane) {
-        this.jTextPane = jTextPane;
-
+    public RSAJava(Integer sizePQ, BigInteger e, BigInteger n, BigInteger p, BigInteger q) {
         this.sizePQ = sizePQ;
         this.n = n;
         this.p = p;
         this.q = q;
-        BigInteger n1 = generateN1();
         this.e = e;
+        BigInteger n1 = generateN1();
         this.d = generateD(n1);
     }
 
@@ -79,7 +70,6 @@ public class RSAJava {
         q1 = q1.negate().add(q);
         BigInteger n1 = BigInteger.ONE;
         n1 = n1.multiply(p1).multiply(q1);
-
         return n1;
     }
 
@@ -96,21 +86,14 @@ public class RSAJava {
         return d;
     }
 
-    public String encrypt(int key) {
-        BigInteger Cbi = new BigInteger(String.valueOf(key));
+    public BigInteger encrypt(BigInteger  key) {
+        BigInteger Cbi = key;
         Cbi = Cbi.modPow(e, n);
-
-        addMessage("Зашифровали ключ ");
-        addMessage("Шифротекст : " + new String(Cbi.toByteArray()));
-        return Cbi.toString();
+        return Cbi;
     }
 
-    public int decrypt(BigInteger Cbi, JTextPane jTextPane) {
-        this.jTextPane = jTextPane;
+    public BigInteger  decrypt(BigInteger Cbi) {
         BigInteger Mbi = Cbi.modPow(d, n);
-        addMessage("e, n, p ,q ");
-        addMessage(e + " " + n + " " + p + " " + q);
-        addMessage("Расшиф ключ : " + Mbi.toString());
-        return Mbi.intValue();
+        return Mbi;
     }
 }

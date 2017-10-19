@@ -6,8 +6,11 @@ import java.nio.file.{Files, Paths}
 import java.security.{SecureRandom, SecureRandomSpi}
 
 import entity._
-import org.json4s
-import org.json4s.{DefaultFormats, JValue}
+
+import scala.util.Random
+import scala.util.control.Breaks
+//import org.json4s
+//import org.json4s.{DefaultFormats, JValue}
 
 import scala.Serializable
 import scala.annotation.tailrec
@@ -15,7 +18,51 @@ import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 object Dao {
-
+//  def isPrime(n: BigInt, k: BigInt): Boolean = {
+//    if (n <= 1)
+//      return false
+//    if (n == 2)
+//      return true
+//    if (n % 2 == 0)
+//      return false
+//    var s: BigInt = 0
+//    var d: BigInt = n - 1
+//    while (d % 2 == 0) {
+//      d /= 2
+//      s += 1
+//    }
+//
+//    val rand = new Random()
+//    var i = 0
+//    val Inner = new Breaks
+//    val Outer = new Breaks
+//
+//    while (i < k) {
+//      Outer.breakable {
+//        val a = rand.nextInt(n.intValue() - 1 - 2)
+//        var x = powMod(a, d, n)
+//        if (x == 1 || x == n - 1)
+//          Outer.break()
+//        var j = 0
+//        Inner.breakable {
+//          while (j < s - 1) {
+//            x = (x * x) % n
+//            if (x == 1)
+//              return false
+//            if (x == n - 1)
+//              Inner.break()
+//            j += 1
+//            j - 1
+//          }
+//        }
+//        if (x != n - 1)
+//          return false
+//        i += 1
+//        i - 1
+//      }
+//    }
+//    true
+//  }
   def writeBytes(fileName: String, array: Array[Byte]): Unit = {
     val out = new FileOutputStream(new File(fileName))
     out.write(array)

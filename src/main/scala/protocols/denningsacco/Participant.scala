@@ -1,6 +1,6 @@
 package protocols.denningsacco
 
-import algorithms.rsa.RSAManager
+import RSA.RSAManager
 import entity.{OpenKey, SecretKey}
 
 class Participant(rsaManager: RSAManager) {

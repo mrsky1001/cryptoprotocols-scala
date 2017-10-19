@@ -1,9 +1,8 @@
-package protocols.simple
+package simple
 
+import java.io.{ByteArrayOutputStream, DataOutputStream}
 
-import annotation.implicitNotFound
-
-import java.io.{DataOutputStream, ByteArrayOutputStream}
+import scala.annotation.implicitNotFound
 
 @implicitNotFound(msg = "Could not find a Writes for ${T}")
 trait Writes[T] {

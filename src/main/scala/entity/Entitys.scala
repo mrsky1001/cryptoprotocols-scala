@@ -3,7 +3,7 @@ package entity
 import java.io.{BufferedReader, PrintStream}
 import java.math.BigInteger
 import java.net.Socket
-import protocols.denningsacco.DenningSacco.participant
+//import protocols.denningsacco.DenningSacco.participant
 
 /**
   * Created by user on 07.10.2017.

@@ -1,9 +1,8 @@
 package gui;
 
-import algorithms.gamma.GammaJava;
 import entity.User;
 import network.Client;
-import protocols.denningsacco.DenningSacco;
+//import protocols.denningsacco.DenningSacco;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -75,10 +74,10 @@ public class MainFrame extends JFrame {
 
             if (user.login().equalsIgnoreCase("trent")) {
                 inputMessageField.setEnabled(false);
-                DenningSacco.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
+//                DenningSacco.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
             } else {
                 try {
-                    client = DenningSacco.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
+//                    client = DenningSacco.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
                 } catch (NullPointerException excp) {
                     connectionButton.setEnabled(true);
                     addMessage("Error, can't connection! \nPlease, try connection again.");

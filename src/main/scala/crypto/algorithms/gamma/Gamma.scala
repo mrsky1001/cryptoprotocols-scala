@@ -1,26 +1,17 @@
 package crypto.algorithms.gamma
 
-object Gamma {
-  private val A = 3
-  private val C = 2
-  private val m = 101
+import crypto.algorithms.extra.SessionKey
 
-  def encrypt(text: String, key: Int): Array[Byte] = {
-    var actualKey = key
-    val arr = text.getBytes
-    arr.map(symbol => {
-      //checking
-      actualKey = (actualKey * A + C) % m
-      (symbol ^ actualKey).toByte
+object Gamma {
+  def encrypt(msg: Array[Byte], sessionKey: SessionKey): Array[Byte] = {
+    msg.map(symbol => {
+      (symbol ^ sessionKey.key).toByte
     })
   }
 
-  def decrypt(text: Array[Byte], key: Int): String = {
-    var actualKey = key
-    text.map(byte => {
-      //checking
-      actualKey = (actualKey * A + C) % m
-      (byte ^ actualKey).toByte
-    }).toString
+  def decrypt(msg: Array[Byte], sessionKey: SessionKey): Array[Byte] = {
+    msg.map(symbol => {
+      (symbol ^ sessionKey.key).toByte
+    })
   }
 }

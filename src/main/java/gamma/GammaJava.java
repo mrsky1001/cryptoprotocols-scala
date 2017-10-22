@@ -1,4 +1,4 @@
-package crypto.algorithms.gamma;
+package gamma;
 
 /**
  * Created by user on 12.09.2017.

@@ -32,6 +32,6 @@ class JavaCryptoEncryption(algorithmName: String) extends Encryption {
 
 object DES extends JavaCryptoEncryption("DES")
 
-object RSA extends JavaCryptoEncryption("RSA")
+object RSA extends JavaCryptoEncryption("rsa")
 
 //object AES extends JavaCryptoEncryption("AES")

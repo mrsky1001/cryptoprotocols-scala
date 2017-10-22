@@ -9,7 +9,7 @@ public class EncryptionUtil {
   /**
    * String to hold name of the encryption algorithm.
    */
-  public static final String ALGORITHM = "RSA";
+  public static final String ALGORITHM = "rsa";
 
   /**
    * String to hold the name of the private key file.

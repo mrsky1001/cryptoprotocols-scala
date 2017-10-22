@@ -1,12 +1,9 @@
 package simple
 
 import java.math.BigInteger
-import java.security.interfaces._
 import java.security.spec._
-import java.security.{KeyFactory, PrivateKey, PublicKey, Security}
+import java.security.{KeyFactory, Security}
 import javax.crypto.Cipher
-
-import org.apache.commons.codec.binary.Base64
 //  import crypto._
 //  import protocol.defaults._
 
@@ -19,7 +16,7 @@ object Main extends App {
 
   val cipher = Cipher.getInstance("RC4", "BC")
 
-  val keyFactory = KeyFactory.getInstance("RSA", "BC")
+  val keyFactory = KeyFactory.getInstance("rsa", "BC")
   val pubKeySpec = new RSAPublicKeySpec(new BigInteger(
     "12345678", 16), new BigInteger("11", 16))
   val privKeySpec = new RSAPrivateKeySpec(new BigInteger(

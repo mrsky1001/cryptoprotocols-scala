@@ -1,4 +1,4 @@
-package RSA;
+package rsa;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;

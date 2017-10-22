@@ -4,7 +4,7 @@ import crypto.algorithms.extra.{PrivateKey, PublicKey}
 import crypto.algorithms.rsa.RSA
 
 //Electronic digital signature
-object EDSonRSA {
+object EDSrsa {
   def sign(msg: Array[Byte], privateKey: PrivateKey, publicKeyDestination: PublicKey): Array[Byte] = {
     val signedMSG = RSA.encrypt(msg, privateKey)
     RSA.encrypt(signedMSG, publicKeyDestination)

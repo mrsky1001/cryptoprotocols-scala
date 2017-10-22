@@ -1,4 +1,4 @@
-package crypto.algorithms.MillerRabina
+package crypto.algorithms.millerRabina
 
 import scala.annotation.tailrec
 import scala.language.{implicitConversions, postfixOps}

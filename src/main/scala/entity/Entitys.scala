@@ -1,7 +1,6 @@
 package entity
 
 import java.io.{BufferedReader, PrintStream}
-import java.math.BigInteger
 import java.net.Socket
 //import protocols.denningsacco.DenningSacco.participant
 
@@ -17,12 +16,12 @@ object OrderSessions extends Enumeration {
   val alice, bob, trent = Value
 }
 
-case class OpenKey(e: BigInteger, n: BigInteger, p: BigInteger, q: BigInteger) {
-  override def toString: String = {
-    "e:" + e + "n:" + n + "p:" + p + "q:" + q
-  }
-}
-
-case class SecretKey(d: BigInteger, n: BigInteger)
+//case class PublicKey(e: BigInteger, n: BigInteger, p: BigInteger, q: BigInteger) {
+//  override def toString: String = {
+//    "e:" + e + "n:" + n + "p:" + p + "q:" + q
+//  }
+//}
+//
+//case class SecretKey(d: BigInteger, n: BigInteger)
 
 case class Session(idSession: String, sock: Socket, is: BufferedReader, ps: PrintStream, sessionKey: Option[Int] = null)

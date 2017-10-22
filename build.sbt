@@ -15,3 +15,6 @@ libraryDependencies += "org.scala-lang" % "scala-swing" % "2.10.6"
 libraryDependencies += "commons-codec" % "commons-codec" % "1.2"
 
 libraryDependencies += "org.bouncycastle" % "bcprov-jdk16" % "1.45"
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+

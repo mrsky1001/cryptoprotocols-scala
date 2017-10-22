@@ -1,21 +1,15 @@
 package dao
 
 import java.io._
-import java.util
 import java.nio.file.{Files, Paths}
-import java.security.{SecureRandom, SecureRandomSpi}
+import java.util
 
 import entity._
-
-import scala.util.Random
-import scala.util.control.Breaks
 //import org.json4s
 //import org.json4s.{DefaultFormats, JValue}
 
-import scala.Serializable
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import scala.io.Source
 
 object Dao {
 //  def isPrime(n: BigInt, k: BigInt): Boolean = {
@@ -166,6 +160,31 @@ object Dao {
     }
     z
   }
+
+  //  def powMod(p: BigInt, q: BigInt, n: BigInt): BigInt = {
+  //    if (q == 0) BigInt(1)
+  //    else if (q == 1) p
+  //    else if (q % 2 == 1) powMod(p, q - 1, n) * p % n
+  //    else powMod(p * p % n, q / 2, n)
+  //  }
+  //  def encPowMod(x: Array[Byte], y: Int, mod: Int): String = {
+  //    x.map{ byte =>
+  //      powMod(byte, y, mod).toByteArray
+  //    }
+  //    "s"
+  //  }
+  //  def encPowMod(x: Array[Byte], y: Int, mod: Int): String = {
+  //    x.toString().sliding(mod.toString.length, mod.toString.length).map { string =>
+  //      powMod(BigInt(string), y, mod).toString()
+  //    }.reduceLeft(_+_)
+  //  }
+
+  //    def powMod(x: BigInt, y: BigInt, mod: BigInt): BigInt = {
+  //        if (y == 0) 1
+  //        else if (y == 1) x
+  //        else if (y % 2 == 1) powMod(x, y - 1, mod) * x % mod
+  //        else powMod(x * x % mod, y / 2, mod)
+  //    }
 
   def ArrayByteToArrayByteR(arrayByte: Array[Byte]): Array[ByteR] = {
     arrayByte.map { byte => new ByteR(byte) }

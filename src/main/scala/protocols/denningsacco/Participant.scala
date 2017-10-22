@@ -1,18 +1,18 @@
-package protocols.denningsacco
-
-import RSA.RSAManager
-import entity.{OpenKey, SecretKey}
-
-class Participant(rsaManager: RSAManager) {
-  def getRSAManager: RSAManager = rsaManager
-
-  def getOpenKey: OpenKey = rsaManager.getOpenKey
-
-  def getSecretKey: SecretKey = rsaManager.getSecretKey
-
-  def generateSessionKey(openKey: OpenKey): Int = rsaManager.generateSessionKey(openKey)
-
-  def parseOpenKey(openKey: String): OpenKey = {
-    rsaManager.parseOpenKey(openKey)
-  }
-}
+//package protocols.denningsacco
+//
+//import RSA.RSAManager
+//import entity.{PublicKey, SecretKey}
+//
+//class Participant(rsaManager: RSAManager) {
+//  def getRSAManager: RSAManager = rsaManager
+//
+//  def getOpenKey: PublicKey = rsaManager.getOpenKey
+//
+//  def getSecretKey: SecretKey = rsaManager.getSecretKey
+//
+//  def generateSessionKey(openKey: PublicKey): Int = rsaManager.generateSessionKey(openKey)
+//
+//  def parseOpenKey(openKey: String): PublicKey = {
+//    rsaManager.parseOpenKey(openKey)
+//  }
+//}

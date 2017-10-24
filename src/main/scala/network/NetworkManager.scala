@@ -10,9 +10,12 @@ class NetworkManager(user: User, messagesPane: StyledDocument) {
 
   def getUser: User = user
 
-  def addMessage(message: String): Unit = {
+  def addMessage(message: String, flag: Boolean = false): Unit = {
     if (messagesPane != null)
-      messagesPane.insertString(messagesPane.getLength, user.login + " => " + message + "\n", null)
+      if (flag)
+        messagesPane.insertString(messagesPane.getLength, message + "\n", null)
+      else
+        messagesPane.insertString(messagesPane.getLength, user.login + " => " + message + "\n", null)
     else
       println("Error, messagesPane = null!!!")
   }

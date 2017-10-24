@@ -91,7 +91,7 @@ public class MainFrame extends JFrame {
 
     private void sendMessage() {
         if (user != null && user.access()) {
-            addMessage(inputMessageField.getText());
+            networkManager.addMessage(inputMessageField.getText(), false);
             if (client != null)
                 client.sendMessage(inputMessageField.getText());
             else

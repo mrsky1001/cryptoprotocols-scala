@@ -10,9 +10,9 @@ case class Client(id: String, socket: Socket, is: BufferedReader, ps: PrintStrea
   def sendMessage(message: String): Unit = {
     if (socket.isConnected) {
       if (id.equalsIgnoreCase(OrderSessions.ALICE.toString))
-        ps.println("[" + OrderSessions.BOB + "]" + message)
+        ps.println(OrderSessions.ALICE + " => " + message)
       else
-        ps.println("[" + OrderSessions.ALICE + "]" + message)
+        ps.println(OrderSessions.BOB + " => " + message)
     }
   }
 }

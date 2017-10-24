@@ -166,7 +166,7 @@
                 <properties>
                   <alignmentX value="1.0"/>
                   <alignmentY value="1.0"/>
-                  <autoscrolls value="false"/>
+                  <autoscrolls value="true"/>
                 </properties>
                 <clientProperties>
                   <charset class="java.lang.String" value=""/>

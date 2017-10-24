@@ -54,15 +54,15 @@ object DenningSacco extends Protocol with ExtraFunc {
                     networkManager.addMessage("get E(S(K, Ta)), S(B, Kb), S(A, Ka) from " + OrderSessions.ALICE.toString)
 
                     sessionKey = SessionKey(message.substring(message.indexOf("sk:") + 3, message.indexOf("ta:")).toInt)
-                    networkManager.addMessage("get session key " + OrderSessions.ALICE.toString + " from " + sessionName)
+                    networkManager.addMessage("get session key " + OrderSessions.ALICE.toString + " from " + OrderSessions.BOB.toString)
                     networkManager.addMessage(SessionKey.toString())
 
                     publicKeyAlice = parseKey(message).asInstanceOf[PublicKey]
-                    networkManager.addMessage("get open key Ka " + OrderSessions.ALICE.toString + " from " + sessionName)
+                    networkManager.addMessage("get open key Ka " + OrderSessions.ALICE.toString + " from " + OrderSessions.BOB.toString)
                     networkManager.addMessage(publicKeyAlice.toString())
 
                     publicKeyBob = parseKey(message.substring(message.lastIndexOf("kb:") + 3)).asInstanceOf[PublicKey]
-                    networkManager.addMessage("get open key Kb " + OrderSessions.ALICE.toString + " from " + sessionName)
+                    networkManager.addMessage("get open key Kb " + OrderSessions.ALICE.toString + " from " + OrderSessions.BOB.toString)
                     networkManager.addMessage(publicKeyBob.toString())
 
                     val Ta = message.substring(message.indexOf("ta:") + 3, message.indexOf("ka:")).toLong + 10000
@@ -70,27 +70,33 @@ object DenningSacco extends Protocol with ExtraFunc {
                     networkManager.addMessage(Ta.toString)
                     if (new Date().getTime - Ta > 500000) {
                       networkManager.addMessage("Error, time-error!!!")
-                    }
+                    } else
+                      networkManager.addMessage("Check  time, OK!")
 
                     val signedSessionMSG = new Message(session.bs.readLine()).getBytes
                     if (!EDSrsa.verification(Array(sessionKey.key.toByte), signedSessionMSG, keysRSA.privateKey, publicKeyAlice)) {
                       networkManager.addMessage("Error, incorrect sign!!!")
-                    }
+                    } else
+                      networkManager.addMessage("Verification, OK!")
 
                     val signedKbMSG = new Message(session.bs.readLine()).getBytes
                     if (!EDSrsa.verification(new Message(keysRSA.publicKey.toString).getBytes, signedKbMSG, keysRSA.privateKey, publicKeyAlice)) {
                       networkManager.addMessage("Error, incorrect sign!!!")
-                    }
+                    } else
+                      networkManager.addMessage("Verification, OK!")
 
                     val signedKaMSG = new Message(session.bs.readLine()).getBytes
                     if (!EDSrsa.verification(new Message(publicKeyAlice.toString).getBytes, signedKaMSG, keysRSA.privateKey, publicKeyAlice)) {
                       networkManager.addMessage("Error, incorrect sign!!!")
                     }
+                    else
+                      networkManager.addMessage("Verification, OK!")
+
 
                     networkManager.getUser.access = true
+                    networkManager.addMessage("Access, true!")
                   }
-                  else
-                    networkManager.addMessage(message)
+
 
                 }
                 else if (message.contains("<" + OrderSessions.BOB.toString + ">") && client.id.equalsIgnoreCase(OrderSessions.ALICE.toString.toString)) {
@@ -115,7 +121,8 @@ object DenningSacco extends Protocol with ExtraFunc {
                     networkManager.addMessage("get signPublicKeyBob from " + sessionName)
                     if (!EDSrsa.verification(publicKeyMSG.getBytes, signedBobMSG, keysRSA.privateKey, publicKeyTrent))
                       networkManager.addMessage("Error, sign not validate!!!")
-
+                    else
+                      networkManager.addMessage("Verification, OK!")
                     publicKeyBob = parseKey(publicKeyMSG.getText).asInstanceOf[PublicKey]
                     networkManager.addMessage(publicKeyBob.toString)
                   }
@@ -127,7 +134,8 @@ object DenningSacco extends Protocol with ExtraFunc {
                     networkManager.addMessage("get signPublicKeyTrent from " + sessionName)
                     if (!EDSrsa.verification(publicKeyMSG.getBytes, signedTrentMSG, keysRSA.privateKey, publicKeyTrent))
                       networkManager.addMessage("Error, sign not validate!!!")
-
+                    else
+                      networkManager.addMessage("Verification, OK!")
                     publicKeyTrent = parseKey(publicKeyMSG.getText).asInstanceOf[PublicKey]
                     networkManager.addMessage(publicKeyTrent.toString)
 
@@ -150,8 +158,11 @@ object DenningSacco extends Protocol with ExtraFunc {
                     networkManager.sessions(0).ps.println(Action(client.id, OrderSessions.BOB.toString, List(Commands.sendBytes.toString)).toString + signedKa.getChars)
 
                     networkManager.getUser.access = true
+                    networkManager.addMessage("Access, true!")
                   }
                 }
+                else
+                  networkManager.addMessage(message.substring(message.indexOf("]")+1), true)
               }
             }
             catch {

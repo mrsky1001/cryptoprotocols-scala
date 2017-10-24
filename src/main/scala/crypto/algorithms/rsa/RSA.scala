@@ -7,7 +7,7 @@ object RSA extends CryptoFunc with FuncRSA {
   def generateKeys(conf: ConfRSA): KeysRSA = {
     val size = conf.keySize-56
     val p = generatePrime(3, Math.sqrt(size).toInt)
-    val q = generatePrime(128/p, size/p, p)
+    val q = generatePrime(129/p, size/p, p)
     val parameters = Parameters(p, q)
     println(parameters)
     val n = parameters.p * parameters.q

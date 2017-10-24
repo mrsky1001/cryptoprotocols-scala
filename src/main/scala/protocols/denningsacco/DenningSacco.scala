@@ -3,7 +3,6 @@ package protocols.denningsacco
 import java.io.IOException
 import java.util.Date
 
-import com.typesafe.config.ConfigException.Null
 import crypto.algorithms.eds.EDSrsa
 import crypto.algorithms.extra._
 import crypto.algorithms.rsa.{ConfRSA, KeysRSA, RSA}
@@ -62,7 +61,7 @@ object DenningSacco extends Protocol with ExtraFunc {
                     networkManager.addMessage("get open key Ka " + OrderSessions.ALICE.toString + " from " + sessionName)
                     networkManager.addMessage(publicKeyAlice.toString())
 
-                    publicKeyBob = parseKey(message.substring(message.lastIndexOf("kb:"))).asInstanceOf[PublicKey]
+                    publicKeyBob = parseKey(message.substring(message.lastIndexOf("kb:") + 3)).asInstanceOf[PublicKey]
                     networkManager.addMessage("get open key Kb " + OrderSessions.ALICE.toString + " from " + sessionName)
                     networkManager.addMessage(publicKeyBob.toString())
 
@@ -73,23 +72,17 @@ object DenningSacco extends Protocol with ExtraFunc {
                       networkManager.addMessage("Error, time-error!!!")
                     }
 
-                    //                    var signedSessionMSG = new Array[Byte](message.substring(message.lastIndexOf("lnS:") + 4, message.lastIndexOf("lnKb:")).toInt)
                     val signedSessionMSG = new Message(session.bs.readLine()).getBytes
                     if (!EDSrsa.verification(Array(sessionKey.key.toByte), signedSessionMSG, keysRSA.privateKey, publicKeyAlice)) {
                       networkManager.addMessage("Error, incorrect sign!!!")
                     }
 
-                    //                    var signedKbMSG = new Array[Byte](message.substring(message.lastIndexOf("lnKb:") + 5, message.lastIndexOf("lnKa:")).toInt)
-                    //                    session.bs.read(signedKbMSG)
                     val signedKbMSG = new Message(session.bs.readLine()).getBytes
                     if (!EDSrsa.verification(new Message(keysRSA.publicKey.toString).getBytes, signedKbMSG, keysRSA.privateKey, publicKeyAlice)) {
                       networkManager.addMessage("Error, incorrect sign!!!")
                     }
 
-//                    var signedKaMSG = new Array[Byte](message.substring(message.lastIndexOf("lnKa:") + 5).toInt)
-                    //                    session.bs.read(signedKaMSG)
                     val signedKaMSG = new Message(session.bs.readLine()).getBytes
-
                     if (!EDSrsa.verification(new Message(publicKeyAlice.toString).getBytes, signedKaMSG, keysRSA.privateKey, publicKeyAlice)) {
                       networkManager.addMessage("Error, incorrect sign!!!")
                     }
@@ -115,11 +108,9 @@ object DenningSacco extends Protocol with ExtraFunc {
                     }
                   }
                   else if (message.contains("{" + Commands.signPublicKeyBob.toString + "}") && client.id.equals(OrderSessions.ALICE.toString)) {
-//                    signedBobMSG = new Array[Byte](message.substring(message.lastIndexOf("ln:") + 3).toInt)
-                    var signed:Array[Char] = new Array[Char](1024)
-//                      new Message(session.bs.read())
-                    session.bs.read(signed)
-                    signedBobMSG = new Message(signed).getBytes
+                    //                    val signed:Array[Char] = new Array[Char](1024)
+                    //                    session.bs.read(signed)
+                    signedBobMSG = new Message(session.bs.readLine()).getBytes
                     var publicKeyMSG = new Message(message.substring(message.lastIndexOf("}") + 1))
                     networkManager.addMessage("get signPublicKeyBob from " + sessionName)
                     if (!EDSrsa.verification(publicKeyMSG.getBytes, signedBobMSG, keysRSA.privateKey, publicKeyTrent))
@@ -129,9 +120,9 @@ object DenningSacco extends Protocol with ExtraFunc {
                     networkManager.addMessage(publicKeyBob.toString)
                   }
                   else if (message.contains("{" + Commands.signPublicKeyTrent.toString + "}") && client.id.equals(OrderSessions.ALICE.toString)) {
-//                    signedTrentMSG = new Array[Byte](message.substring(message.lastIndexOf("ln:") + 3).toInt)
-                    val signed = new Message(session.bs.readLine())
-                    signedTrentMSG = signed.getBytes
+                    //                    val signed:Array[Char] = new Array[Char](1024)
+                    //                    session.bs.read(signed)
+                    signedTrentMSG = new Message(session.bs.readLine()).getBytes
                     var publicKeyMSG = new Message(message.substring(message.lastIndexOf("}") + 1))
                     networkManager.addMessage("get signPublicKeyTrent from " + sessionName)
                     if (!EDSrsa.verification(publicKeyMSG.getBytes, signedTrentMSG, keysRSA.privateKey, publicKeyTrent))
@@ -151,12 +142,12 @@ object DenningSacco extends Protocol with ExtraFunc {
                     val signedK = new Message(EDSrsa.sign(Array(sessionKey.key.toByte), keysRSA.privateKey, publicKeyBob))
                     val signedKb = new Message(EDSrsa.sign(new Message(publicKeyBob.toString).getBytes, keysRSA.privateKey, publicKeyBob))
                     val signedKa = new Message(EDSrsa.sign(new Message(keysRSA.publicKey.toString).getBytes, keysRSA.privateKey, publicKeyBob))
-                    val msg = new Message(Action(client.id, OrderSessions.BOB.toString, List(Commands.sessionKey.toString)).toString + "sk:" + sessionKey + "ta:" + markTa + "ka:" + keysRSA.publicKey.toString + "kb:" + publicKeyBob.toString)
+                    val msg = new Message(Action(client.id, OrderSessions.BOB.toString, List(Commands.sessionKey.toString)).toString + "sk:" + sessionKey.key + "ta:" + markTa + "ka:" + keysRSA.publicKey.toString + "kb:" + publicKeyBob.toString)
                     networkManager.sessions(0).ps.println(msg)
                     networkManager.addMessage("send E(S(K, Ta)), S(B, Kb), S(A, Ka) to " + OrderSessions.BOB.toString)
-                    networkManager.sessions(0).ps.print(signedK.getChars)
-                    networkManager.sessions(0).ps.print(signedKb.getChars)
-                    networkManager.sessions(0).ps.print(signedKa.getChars)
+                    networkManager.sessions(0).ps.println(Action(client.id, OrderSessions.BOB.toString, List(Commands.sendBytes.toString)).toString + signedK.getChars)
+                    networkManager.sessions(0).ps.println(Action(client.id, OrderSessions.BOB.toString, List(Commands.sendBytes.toString)).toString + signedKb.getChars)
+                    networkManager.sessions(0).ps.println(Action(client.id, OrderSessions.BOB.toString, List(Commands.sendBytes.toString)).toString + signedKa.getChars)
 
                     networkManager.getUser.access = true
                   }
@@ -180,7 +171,7 @@ object DenningSacco extends Protocol with ExtraFunc {
       var keysRSA: KeysRSA = null
       actor {
         while (true) {
-          if (networkManager.sessions.size > 1)
+          if (networkManager.sessions.nonEmpty)
             for (source <- networkManager.sessions) {
 
               try {
@@ -189,13 +180,7 @@ object DenningSacco extends Protocol with ExtraFunc {
                   val sourceName = source.idSession //change
                   //0 - bob, 1 - alice, x - trent
                   //[] - who destination? <> - who source
-                  if (message.contains("[" + OrderSessions.ALICE.toString + "]")) {
-                    networkManager.sessions(0).ps.println(message)
-                  }
-                  else if (message.contains("[" + OrderSessions.BOB.toString + "]")) {
-                    networkManager.sessions(1).ps.println(message)
-                  }
-                  else if (message.contains("[" + OrderSessions.TRENT + "]")) {
+                  if (message.contains("[" + OrderSessions.TRENT + "]")) {
                     if (message.contains("{" + Commands.publicKey.toString + "}")) {
                       val getPublicKey = parseKey(message).asInstanceOf[PublicKey]
                       networkManager.addMessage("get open key from " + sourceName)
@@ -204,17 +189,20 @@ object DenningSacco extends Protocol with ExtraFunc {
                       if (sourceName.equalsIgnoreCase(OrderSessions.ALICE.toString)) {
                         publicKeyAlice = getPublicKey
 
+
+                      } else {
+                        publicKeyBob = getPublicKey
+
                         networkManager.addMessage("generateKeys")
                         keysRSA = RSA.generateKeys(ConfRSA())
                         networkManager.addMessage(keysRSA.toString)
 
-                        val msg = new Message(Action(OrderSessions.TRENT.toString, OrderSessions.ALICE.toString, List(Commands.publicKey.toString)) + keysRSA.publicKey.toString)
-                        networkManager.sessions(0).ps.println(msg)
-                      } else {
-                        publicKeyBob = getPublicKey
-
                         val msg = new Message(Action(OrderSessions.TRENT.toString, OrderSessions.BOB.toString, List(Commands.publicKey.toString)) + keysRSA.publicKey.toString)
                         networkManager.sessions(1).ps.println(msg)
+
+
+                        val msg2 = new Message(Action(OrderSessions.TRENT.toString, OrderSessions.ALICE.toString, List(Commands.publicKey.toString)) + keysRSA.publicKey.toString)
+                        networkManager.sessions(0).ps.println(msg2)
                       }
                     }
                     else if (message.contains("{" + Commands.AB.toString + "}")) {
@@ -225,15 +213,30 @@ object DenningSacco extends Protocol with ExtraFunc {
                       val msgB = new Message(Action(OrderSessions.TRENT.toString, OrderSessions.ALICE.toString, List(Commands.signPublicKeyBob.toString)).toString + publicKeyBob)
                       networkManager.addMessage("send S(B, Kb) to " + sourceName)
                       networkManager.sessions(0).ps.println(msgB)
-                      networkManager.sessions(0).ps.print(signKb.getChars)
+                      networkManager.sessions(0).ps.println(signKb.getChars)
 
                       val msgKt = new Message(keysRSA.publicKey.toString)
                       val signKt = new Message(EDSrsa.sign(msgKt.getBytes, keysRSA.privateKey, publicKeyAlice))
                       val msgT = new Message(Action(OrderSessions.TRENT.toString, OrderSessions.ALICE.toString, List(Commands.signPublicKeyTrent.toString)).toString + keysRSA.publicKey)
                       networkManager.addMessage("send S(A, Kt) to " + sourceName)
                       networkManager.sessions(0).ps.println(msgT)
-                      networkManager.sessions(0).ps.print(signKb.getChars)
+                      networkManager.sessions(0).ps.println(signKb.getChars)
+                      mainFrame.dispose()
                     }
+                  }
+                  else if (sourceName.contains(OrderSessions.BOB.toString)) {
+                    //                  if (message.contains("[" + OrderSessions.ALICE.toString + "]")) {
+                    //                    if (message.contains(Action(OrderSessions.BOB.toString, OrderSessions.ALICE.toString, List(Commands.sendBytes.toString)).toString))
+                    //                      networkManager.sessions(0).ps.println(message.substring(message.lastIndexOf("}") + 1))
+                    //                    else
+                    networkManager.sessions(0).ps.println(message)
+                  }
+                  else if (sourceName.contains(OrderSessions.ALICE.toString)) {
+                    //                    else if (message.contains("[" + OrderSessions.BOB.toString + "]")) {
+                    //                    if (message.contains(Action(OrderSessions.ALICE.toString, OrderSessions.BOB.toString, List(Commands.sendBytes.toString)).toString))
+                    //                      networkManager.sessions(1).ps.println(message.substring(message.lastIndexOf("}") + 1))
+                    //                    else
+                    networkManager.sessions(1).ps.println(message)
                   }
                 }
               }

@@ -14,7 +14,7 @@ object OrderSessions extends Enumeration {
 
 object Commands extends Enumeration {
   type Commands = Value
-  val publicKey, AB, signPublicKeyBob, signPublicKeyTrent, sessionKey = Value
+  val publicKey, AB, signPublicKeyBob, signPublicKeyTrent, sessionKey, sendBytes = Value
 }
 
 case class Session(idSession: String, sock: Socket, bs: BufferedReader, ps: PrintStream, sessionKey: Option[Int] = null)

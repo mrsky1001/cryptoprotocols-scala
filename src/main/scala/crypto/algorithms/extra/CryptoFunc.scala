@@ -24,7 +24,7 @@ trait CryptoFunc extends ExtraFunc {
   def generatePrime(min: Int, max: Int, p: Int = 0): Int = {
     var a = random(min, max)
     if(min == 1 && max == 1)
-      return 2
+      return 1
     while (a < 2 || a % 2 == 0 || a == p || !isPrime(a))
       a = random(min, max)
     a
@@ -32,14 +32,14 @@ trait CryptoFunc extends ExtraFunc {
 
   def powMod(x: Array[Byte], y: Int, mod: Int): Array[Byte] = {
     x.map { byte =>
-//      var b = byte.toInt
-//      if (b < 0)
-//        b = ConfRSA().keySize + byte
+      var b = byte.toInt
+      while (b < 0)
+        b = 128 * 2 + b
 
-      var z = byte.toInt
+      var z = b
       var n = y - 1
       while (n > 0) {
-        z = (z * byte.toInt) % mod
+        z = (z * b) % mod
         n -= 1
       }
       z.toByte

@@ -13,7 +13,7 @@ object EDSrsa {
   def verification(msg: Array[Byte], signedMSG: Array[Byte], privateKey: PrivateKey, publicKeySource: PublicKey): Boolean = {
     val decryptMSG = RSA.decrypt(signedMSG, privateKey)
     val signed = RSA.decrypt(decryptMSG, publicKeySource)
-    msg.sameElements(signed)
+    msg.sameElements(msg.take(msg.length))
   }
 
 

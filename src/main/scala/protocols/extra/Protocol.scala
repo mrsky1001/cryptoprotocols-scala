@@ -7,14 +7,14 @@ trait Protocol {
   def parseKey(message: String): CryptoKey = {
     val indexKey = message.indexOf("key:")
     val indexN = message.indexOf("n:")
+    val indexKB = message.indexOf("kb:")
 
     val key = message.substring(indexKey + 4, indexN)
-    val n = message.substring(indexN + 2)
+    if(indexKB != -1)
+      PublicKey(key.toInt,  message.substring(indexN + 2, indexKB).toInt)
+    else
+      PublicKey(key.toInt,  message.substring(indexN + 2).toInt)
 
-//    if (message.contains("{publicKey}"))
-      PublicKey(key.toInt, n.toInt)
-//    else
-//      null
   }
 
 }

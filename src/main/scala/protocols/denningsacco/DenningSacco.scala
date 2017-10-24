@@ -1,242 +1,264 @@
-//package protocols.denningsacco
-//
-//import java.io.IOException
-//import java.math.BigInteger
-//import java.util.Date
-//import javax.swing.JTextPane
-//
-//import algorithms.CRC
-//import RSA.RSAManager
-//import entity._
-//import network.{Client, Connection, Server}
-//
-//import scala.actors.Actor._
-//import scala.collection.mutable
-//
-///**
-//  * Created by user on 07.10.2017.
-//  */
-//object DenningSacco {
-//
-//  var messagesPane: JTextPane = _
-//  var mainForm: gui.MainFrame = _
-//  val sessions = new mutable.ArrayBuffer[Session] with mutable.SynchronizedBuffer[Session]
-//
-//  var openKey: OpenKey = _
-//  var secretKey: SecretKey = _
-//  var sessionKey: Int = _
-//  val timeEq: Long = 100000
-//  var openKeyAlice: OpenKey = _
-//  var openKeyBob: OpenKey = _
-//  var openKeyTrent: OpenKey = _
-//  val participant = new Participant(new RSAManager)
-//  var secretKeyAlice: SecretKey = _
-//  var secretKeyBob: SecretKey = _
-//  var secretKeyTrent: SecretKey = _
-//
-//  def addMessage(message: String): Unit = {
-//    if (messagesPane != null)
-//      messagesPane.setText(messagesPane.getText + "\n" + message)
-//    else
-//      println("Error, messagesPane = null!!!")
-//  }
-//
-//  def startClient(user: User, port: Int, backlog: Int, address: String, messagesPane: JTextPane, mainForm: gui.MainFrame): Client = {
-//    this.messagesPane = messagesPane
-//    this.mainForm = mainForm
-//    start(whoami = false, user, port, backlog, address)
-//  }
-//
-//  def startServer(user: User, port: Int, backlog: Int, address: String, messagesPane: JTextPane, mainForm: gui.MainFrame): Client = {
-//    this.messagesPane = messagesPane
-//    this.mainForm = mainForm
-//    start(whoami = true, user, port, backlog, address)
-//  }
-//
-//  def start(whoami: Boolean, user: User, port: Int, backlog: Int, address: String): Client = {
-//
-//
-//    if (!whoami) {
-//      val client = Connection.start(sessions, port, backlog, address)
-//      addMessage(user.login + " => generateOpenKey")
-//      openKey = participant.getOpenKey
-//      addMessage("openkey " + openKey.toString)
-//      addMessage(user.login + " => generateSecretKey")
-//      secretKey = participant.getSecretKey
-//      addMessage("secretkey " + secretKey.toString)
-//
-//      addMessage(user.login + " => sendOpenKey to " + OrderSessions.trent)
-//      sessions(0).ps.println("[" + OrderSessions.trent + "][openKey]" + openKey.toString)
-//      //client
-//      actor {
-//        while (true) {
-//          for (session <- sessions) {
-//            try {
-//              if (session.is.ready) {
-//                val message = session.is.readLine()
-//                val sessionName = "<" + session.idSession + ">"
-//
-//                if (message.contains("<" + OrderSessions.alice + ">") && client.id.equalsIgnoreCase(OrderSessions.bob.toString)) {
-//                  if (message.contains("[sessionKey]")) {
-//                    val getMesStr = message.replace("<" + OrderSessions.alice + ">[sessionKey]", "")
-//                    addMessage(user.login + " => get E(S(K, Ta)), S(B, Kb), S(A, Ka) from " + OrderSessions.alice)
-//
-//                    openKeyBob = participant.parseOpenKey(getMesStr.substring(getMesStr.indexOf("kb:")))
-//                    addMessage(user.login + " => get open key Kb " + OrderSessions.alice + " from " + session.idSession)
-//                    addMessage(openKeyBob.e.toString())
-//
-//                    val Ta = getMesStr.substring(getMesStr.indexOf("ta:") + 3, getMesStr.indexOf("ka:")).toLong + 10000
-//                    addMessage(user.login + " => get Ta from " + session.idSession)
-//                    addMessage(Ta.toString)
-//
-//                    if (openKey.e.intValue() != openKeyBob.e.intValue() || new Date().getTime - Ta > timeEq) {
-//                      addMessage("Error, incorrect CRC or time-error!!!")
-//                    } else {
-//                      openKeyAlice = participant.parseOpenKey(getMesStr.substring(0, getMesStr.indexOf("kb")))
-//                      addMessage(user.login + " => get open key Ka " + OrderSessions.alice + " from " + session.idSession)
-//                      addMessage(openKeyAlice.e.toString())
-//
-//                      sessionKey = getMesStr.substring(getMesStr.indexOf("sk:") + 3, getMesStr.indexOf("ta:")).toInt
-//                      addMessage(user.login + " => get session key from " + session.idSession)
-//                      addMessage(sessionKey.toString)
-//                      user.access = true
-//                    }
-//                  }
-//                  else
-//                    addMessage(message)
-//
-//                }
-//                else if (message.contains("<" + OrderSessions.bob + ">")&& client.id.equalsIgnoreCase(OrderSessions.alice.toString) ) {
-//                  addMessage(message)
-//                }
-//                else if (message.contains("<" + OrderSessions.trent + ">")) {
-//                  if (message.contains("[openKey]")) {
-//                    val getOpenKey = participant.parseOpenKey(message.replace("<" + OrderSessions.trent + ">[openKey]", ""))
-//                    openKeyTrent = getOpenKey
-//
-//                    if (client.id.equalsIgnoreCase(OrderSessions.alice.toString)) {
-//                      addMessage(user.login + " => get open key from " + session.idSession)
-//                      addMessage(user.login + " => send {A, B} to " + session.idSession)
-//                      sessions(0).ps.println("[" + OrderSessions.trent + "][A, B]")
-//                    }
-//                  }
-//                  else if (message.contains("[signKey1]")) {
-//                    val getMesStr = message.replace("<" + OrderSessions.trent + ">[signKey1]", "")
-//                    println("e = " + CRC.unsign(openKey, openKeyTrent, getMesStr.substring(0, getMesStr.indexOf("e:"))))
-//
-//                    openKeyBob = participant.parseOpenKey(getMesStr)
-//                    addMessage(user.login + " => get CRC open key " + OrderSessions.bob + " from " + session.idSession)
-//                    addMessage(openKeyBob.e.toString())
-//                  }
-//                  else if (message.contains("[signKey2]")) {
-//                    val getMesStr = message.replace("<" + OrderSessions.trent + ">[signKey2]", "")
-//                    println("e = " + CRC.unsign(openKey, openKeyTrent, getMesStr.substring(0, getMesStr.indexOf("e:"))))
-//
-//                    openKeyTrent = participant.parseOpenKey(getMesStr)
-//                    addMessage(user.login + " => get CRC open key " + OrderSessions.trent + " from " + session.idSession)
-//                    addMessage(openKeyTrent.e.toString())
-//
-//                    /////
-//                    addMessage(user.login + " => generate session key ")
-//                    sessionKey = participant.generateSessionKey(openKey)
-//                    addMessage("sessionkey " + sessionKey.toString)
-//
-//                    addMessage(user.login + " => generate mark Ta ")
-//                    val markTa = new Date().getTime
-//                    addMessage(new Date().toString)
-//                    val signedK = CRC.sign(openKey, openKeyBob, new BigInteger(sessionKey.toString))
-//                    val signedKb = CRC.sign(openKey, openKeyBob, new BigInteger(openKeyBob.e.toString))
-//                    val signedKa = CRC.sign(openKey, openKeyBob, new BigInteger(openKey.e.toString))
-//
-//                    addMessage(user.login + " => send E(S(K, Ta)), S(B, Kb), S(A, Ka) to " + OrderSessions.bob)
-//                    sessions(0).ps.println("[" + OrderSessions.bob + "][sessionKey]" + "sk:" + sessionKey + "ta:" + markTa + "ka:" + openKey.toString + "kb:" + openKeyBob.toString)
-//                    user.access = true
-//                  }
-//                }
-//              }
-//            }
-//            catch {
-//              case e: IOException => addMessage("Error, close client!!!\n" + e.getMessage)
-//            }
-//          }
-//        }
-//      }
-//
-//
-//      client
-//    }
-//
-//    else {
-//      actor {
-//        while (true) {
-//          if (sessions.size > 1)
-//            for (source <- sessions) {
-//
-//              try {
-//                if (source.is.ready) {
-//                  val message = source.is.readLine()
-//                  val sourceName = "<" + source.idSession + ">" //change
-//                  //0 - bob, 1 - alice, x - trent
-//                  //[] - who destination? <> - who source
-//                  if (message.contains("[" + OrderSessions.alice + "]")) {
-//                    sessions(0).ps.println(message.replace("[" + OrderSessions.alice + "]", sourceName))
-//                  }
-//                  else if (message.contains("[" + OrderSessions.bob + "]")) {
-//                    sessions(1).ps.println(message.replace("[" + OrderSessions.bob + "]", sourceName))
-//                  }
-//                  else if (message.contains("[" + OrderSessions.trent + "]")) {
-//                    if (message.contains("[openKey]")) {
-//                      val getOpenKey = participant.parseOpenKey(message.replace("[" + OrderSessions.trent + "][openKey]", ""))
-//
-//                      addMessage(user.login + " => get open key from " + source.idSession)
-//                      addMessage(user.login + " => send my open key to " + source.idSession)
-//                      if (source.idSession.equalsIgnoreCase(OrderSessions.alice.toString)) {
-//                        addMessage(user.login + " => generateOpenKey")
-//                        openKey = participant.getOpenKey
-//                        addMessage("openKey " + openKey.toString)
-//
-//                        addMessage(user.login + " => generateSecretKey")
-//                        secretKey = participant.getSecretKey
-//                        addMessage("secretkey " + secretKey.toString)
-//
-//                        openKeyAlice = getOpenKey
-//                        sessions(0).ps.println("<" + OrderSessions.trent + ">[openKey]" + openKey.toString)
-//                      } else {
-//                        openKeyBob = getOpenKey
-//                        sessions(1).ps.println("<" + OrderSessions.trent + ">[openKey]" + openKey.toString)
-//                      }
-//                    }
-//                    else if (message.contains("[A, B]")) {
-//                      addMessage(user.login + " => get A, B from " + source.idSession)
-//                      addMessage(user.login + " => send S(B, Kb) from " + source.idSession)
-//                      sessions(0).ps.println("<" + OrderSessions.trent + ">[signKey1]" + CRC.sign(openKey, openKeyAlice, new BigInteger(openKeyBob.e.toString)) + openKeyBob.toString)
-//                      sessions(0).ps.println("<" + OrderSessions.trent + ">[signKey2]" + CRC.sign(openKey, openKeyAlice, new BigInteger(openKey.e.toString)) + openKey.toString)
-//                    }
-//                  }
-//                }
-//              }
-//              catch {
-//                case e: IOException => addMessage("Error, close client!!!\n" + e.getMessage)
-//              }
-//            }
-//        }
-//      }
-//
-//      Server.start(sessions, port, backlog, address)
-//      null
-//    }
-//  }
-//
-//  def close(): Unit = {
-//    for (session <- sessions) {
-//      try {
-//        session.is.close()
-//        session.ps.close()
-//        session.sock.close()
-//      }
-//      catch {
-//        case e: Throwable => addMessage("Error, close socket!!! \n" + e.getMessage)
-//      }
-//    }
-//  }
-//}
+package protocols.denningsacco
+
+import java.io.IOException
+import java.util.Date
+
+import com.typesafe.config.ConfigException.Null
+import crypto.algorithms.eds.EDSrsa
+import crypto.algorithms.extra._
+import crypto.algorithms.rsa.{ConfRSA, KeysRSA, RSA}
+import network._
+import protocols.extra.Protocol
+
+import scala.actors.Actor._
+
+object DenningSacco extends Protocol with ExtraFunc {
+
+  var networkManager: NetworkManager = _
+  var mainForm: gui.MainFrame = _
+
+  private def init(networkManager: NetworkManager, mainFrame: gui.MainFrame) {
+    this.networkManager = networkManager
+    this.mainForm = mainFrame
+  }
+
+  def start(whoiam: Boolean, port: Int, backlog: Int, address: String, networkManager: NetworkManager, mainFrame: gui.MainFrame): Client = {
+    init(networkManager, mainFrame)
+
+    if (!whoiam) {
+      val client = Connection.start(networkManager.sessions, port, backlog, address)
+      networkManager.addMessage("generate Keys")
+
+      val keysRSA = RSA.generateKeys(ConfRSA())
+      networkManager.addMessage(keysRSA.toString)
+
+      networkManager.addMessage("send publicKey to " + OrderSessions.TRENT)
+      val msg = new Message(Action(client.id, OrderSessions.TRENT.toString, List(Commands.publicKey.toString)) + keysRSA.publicKey.toString)
+      networkManager.sessions(0).ps.println(msg)
+
+      var publicKeyTrent: PublicKey = null
+      var publicKeyBob: PublicKey = null
+      var publicKeyAlice: PublicKey = null
+      var sessionKey: SessionKey = null
+      var signedBobMSG: Array[Byte] = null
+      var signedTrentMSG: Array[Byte] = null
+      actor {
+        while (true) {
+          for (session <- networkManager.sessions) {
+            try {
+              if (session.bs.ready) {
+                val message = session.bs.readLine()
+                val sessionName = session.idSession
+
+                if (message.contains("<" + OrderSessions.ALICE.toString + ">") && client.id.equalsIgnoreCase(OrderSessions.BOB.toString)) {
+                  if (message.contains("{" + Commands.sessionKey.toString + "}")) {
+                    networkManager.addMessage("get E(S(K, Ta)), S(B, Kb), S(A, Ka) from " + OrderSessions.ALICE.toString)
+
+                    sessionKey = SessionKey(message.substring(message.indexOf("sk:") + 3, message.indexOf("ta:")).toInt)
+                    networkManager.addMessage("get session key " + OrderSessions.ALICE.toString + " from " + sessionName)
+                    networkManager.addMessage(SessionKey.toString())
+
+                    publicKeyAlice = parseKey(message).asInstanceOf[PublicKey]
+                    networkManager.addMessage("get open key Ka " + OrderSessions.ALICE.toString + " from " + sessionName)
+                    networkManager.addMessage(publicKeyAlice.toString())
+
+                    publicKeyBob = parseKey(message.substring(message.lastIndexOf("kb:"))).asInstanceOf[PublicKey]
+                    networkManager.addMessage("get open key Kb " + OrderSessions.ALICE.toString + " from " + sessionName)
+                    networkManager.addMessage(publicKeyBob.toString())
+
+                    val Ta = message.substring(message.indexOf("ta:") + 3, message.indexOf("ka:")).toLong + 10000
+                    networkManager.addMessage("get Ta from " + sessionName)
+                    networkManager.addMessage(Ta.toString)
+                    if (new Date().getTime - Ta > 500000) {
+                      networkManager.addMessage("Error, time-error!!!")
+                    }
+
+                    //                    var signedSessionMSG = new Array[Byte](message.substring(message.lastIndexOf("lnS:") + 4, message.lastIndexOf("lnKb:")).toInt)
+                    val signedSessionMSG = new Message(session.bs.readLine()).getBytes
+                    if (!EDSrsa.verification(Array(sessionKey.key.toByte), signedSessionMSG, keysRSA.privateKey, publicKeyAlice)) {
+                      networkManager.addMessage("Error, incorrect sign!!!")
+                    }
+
+                    //                    var signedKbMSG = new Array[Byte](message.substring(message.lastIndexOf("lnKb:") + 5, message.lastIndexOf("lnKa:")).toInt)
+                    //                    session.bs.read(signedKbMSG)
+                    val signedKbMSG = new Message(session.bs.readLine()).getBytes
+                    if (!EDSrsa.verification(new Message(keysRSA.publicKey.toString).getBytes, signedKbMSG, keysRSA.privateKey, publicKeyAlice)) {
+                      networkManager.addMessage("Error, incorrect sign!!!")
+                    }
+
+//                    var signedKaMSG = new Array[Byte](message.substring(message.lastIndexOf("lnKa:") + 5).toInt)
+                    //                    session.bs.read(signedKaMSG)
+                    val signedKaMSG = new Message(session.bs.readLine()).getBytes
+
+                    if (!EDSrsa.verification(new Message(publicKeyAlice.toString).getBytes, signedKaMSG, keysRSA.privateKey, publicKeyAlice)) {
+                      networkManager.addMessage("Error, incorrect sign!!!")
+                    }
+
+                    networkManager.getUser.access = true
+                  }
+                  else
+                    networkManager.addMessage(message)
+
+                }
+                else if (message.contains("<" + OrderSessions.BOB.toString + ">") && client.id.equalsIgnoreCase(OrderSessions.ALICE.toString.toString)) {
+                  networkManager.addMessage(message)
+                }
+                else if (message.contains("<" + OrderSessions.TRENT + ">")) {
+                  if (message.contains("{" + Commands.publicKey.toString + "}")) {
+                    networkManager.addMessage("get open key from " + sessionName)
+                    publicKeyTrent = parseKey(message).asInstanceOf[PublicKey]
+
+                    if (client.id.equalsIgnoreCase(OrderSessions.ALICE.toString)) {
+                      networkManager.addMessage("send {A, B} to " + sessionName)
+                      val msg = new Message(Action(client.id, OrderSessions.TRENT.toString, List(Commands.AB.toString)).toString)
+                      networkManager.sessions(0).ps.println(msg)
+                    }
+                  }
+                  else if (message.contains("{" + Commands.signPublicKeyBob.toString + "}") && client.id.equals(OrderSessions.ALICE.toString)) {
+//                    signedBobMSG = new Array[Byte](message.substring(message.lastIndexOf("ln:") + 3).toInt)
+                    var signed:Array[Char] = new Array[Char](1024)
+//                      new Message(session.bs.read())
+                    session.bs.read(signed)
+                    signedBobMSG = new Message(signed).getBytes
+                    var publicKeyMSG = new Message(message.substring(message.lastIndexOf("}") + 1))
+                    networkManager.addMessage("get signPublicKeyBob from " + sessionName)
+                    if (!EDSrsa.verification(publicKeyMSG.getBytes, signedBobMSG, keysRSA.privateKey, publicKeyTrent))
+                      networkManager.addMessage("Error, sign not validate!!!")
+
+                    publicKeyBob = parseKey(publicKeyMSG.getText).asInstanceOf[PublicKey]
+                    networkManager.addMessage(publicKeyBob.toString)
+                  }
+                  else if (message.contains("{" + Commands.signPublicKeyTrent.toString + "}") && client.id.equals(OrderSessions.ALICE.toString)) {
+//                    signedTrentMSG = new Array[Byte](message.substring(message.lastIndexOf("ln:") + 3).toInt)
+                    val signed = new Message(session.bs.readLine())
+                    signedTrentMSG = signed.getBytes
+                    var publicKeyMSG = new Message(message.substring(message.lastIndexOf("}") + 1))
+                    networkManager.addMessage("get signPublicKeyTrent from " + sessionName)
+                    if (!EDSrsa.verification(publicKeyMSG.getBytes, signedTrentMSG, keysRSA.privateKey, publicKeyTrent))
+                      networkManager.addMessage("Error, sign not validate!!!")
+
+                    publicKeyTrent = parseKey(publicKeyMSG.getText).asInstanceOf[PublicKey]
+                    networkManager.addMessage(publicKeyTrent.toString)
+
+                    /////
+                    networkManager.addMessage("generate session key ")
+                    sessionKey = SessionKey(random(1, 99))
+                    networkManager.addMessage("sessionkey " + sessionKey.toString)
+
+                    networkManager.addMessage("generate mark Ta ")
+                    val markTa = new Date().getTime
+                    networkManager.addMessage(new Date().toString)
+                    val signedK = new Message(EDSrsa.sign(Array(sessionKey.key.toByte), keysRSA.privateKey, publicKeyBob))
+                    val signedKb = new Message(EDSrsa.sign(new Message(publicKeyBob.toString).getBytes, keysRSA.privateKey, publicKeyBob))
+                    val signedKa = new Message(EDSrsa.sign(new Message(keysRSA.publicKey.toString).getBytes, keysRSA.privateKey, publicKeyBob))
+                    val msg = new Message(Action(client.id, OrderSessions.BOB.toString, List(Commands.sessionKey.toString)).toString + "sk:" + sessionKey + "ta:" + markTa + "ka:" + keysRSA.publicKey.toString + "kb:" + publicKeyBob.toString)
+                    networkManager.sessions(0).ps.println(msg)
+                    networkManager.addMessage("send E(S(K, Ta)), S(B, Kb), S(A, Ka) to " + OrderSessions.BOB.toString)
+                    networkManager.sessions(0).ps.print(signedK.getChars)
+                    networkManager.sessions(0).ps.print(signedKb.getChars)
+                    networkManager.sessions(0).ps.print(signedKa.getChars)
+
+                    networkManager.getUser.access = true
+                  }
+                }
+              }
+            }
+            catch {
+              case e: IOException => networkManager.addMessage("Error, close client!!!\n" + e.getMessage)
+            }
+          }
+        }
+      }
+
+
+      client
+    }
+
+    else {
+      var publicKeyAlice: PublicKey = null
+      var publicKeyBob: PublicKey = null
+      var keysRSA: KeysRSA = null
+      actor {
+        while (true) {
+          if (networkManager.sessions.size > 1)
+            for (source <- networkManager.sessions) {
+
+              try {
+                if (source.bs.ready) {
+                  val message = source.bs.readLine()
+                  val sourceName = source.idSession //change
+                  //0 - bob, 1 - alice, x - trent
+                  //[] - who destination? <> - who source
+                  if (message.contains("[" + OrderSessions.ALICE.toString + "]")) {
+                    networkManager.sessions(0).ps.println(message)
+                  }
+                  else if (message.contains("[" + OrderSessions.BOB.toString + "]")) {
+                    networkManager.sessions(1).ps.println(message)
+                  }
+                  else if (message.contains("[" + OrderSessions.TRENT + "]")) {
+                    if (message.contains("{" + Commands.publicKey.toString + "}")) {
+                      val getPublicKey = parseKey(message).asInstanceOf[PublicKey]
+                      networkManager.addMessage("get open key from " + sourceName)
+
+                      networkManager.addMessage("send my open key to " + sourceName)
+                      if (sourceName.equalsIgnoreCase(OrderSessions.ALICE.toString)) {
+                        publicKeyAlice = getPublicKey
+
+                        networkManager.addMessage("generateKeys")
+                        keysRSA = RSA.generateKeys(ConfRSA())
+                        networkManager.addMessage(keysRSA.toString)
+
+                        val msg = new Message(Action(OrderSessions.TRENT.toString, OrderSessions.ALICE.toString, List(Commands.publicKey.toString)) + keysRSA.publicKey.toString)
+                        networkManager.sessions(0).ps.println(msg)
+                      } else {
+                        publicKeyBob = getPublicKey
+
+                        val msg = new Message(Action(OrderSessions.TRENT.toString, OrderSessions.BOB.toString, List(Commands.publicKey.toString)) + keysRSA.publicKey.toString)
+                        networkManager.sessions(1).ps.println(msg)
+                      }
+                    }
+                    else if (message.contains("{" + Commands.AB.toString + "}")) {
+                      networkManager.addMessage("get A, B from " + sourceName)
+
+                      val msgKb = new Message(publicKeyBob.toString)
+                      val signKb = new Message(EDSrsa.sign(msgKb.getBytes, keysRSA.privateKey, publicKeyAlice))
+                      val msgB = new Message(Action(OrderSessions.TRENT.toString, OrderSessions.ALICE.toString, List(Commands.signPublicKeyBob.toString)).toString + publicKeyBob)
+                      networkManager.addMessage("send S(B, Kb) to " + sourceName)
+                      networkManager.sessions(0).ps.println(msgB)
+                      networkManager.sessions(0).ps.print(signKb.getChars)
+
+                      val msgKt = new Message(keysRSA.publicKey.toString)
+                      val signKt = new Message(EDSrsa.sign(msgKt.getBytes, keysRSA.privateKey, publicKeyAlice))
+                      val msgT = new Message(Action(OrderSessions.TRENT.toString, OrderSessions.ALICE.toString, List(Commands.signPublicKeyTrent.toString)).toString + keysRSA.publicKey)
+                      networkManager.addMessage("send S(A, Kt) to " + sourceName)
+                      networkManager.sessions(0).ps.println(msgT)
+                      networkManager.sessions(0).ps.print(signKb.getChars)
+                    }
+                  }
+                }
+              }
+              catch {
+                case e: IOException => networkManager.addMessage("Error, close client!!!\n" + e.getMessage)
+              }
+            }
+        }
+      }
+
+      Server.start(networkManager.sessions, port, backlog, address)
+      null
+    }
+  }
+
+  def close(): Unit = {
+    for (session <- networkManager.sessions) {
+      try {
+        session.bs.close()
+        session.ps.close()
+        session.sock.close()
+      }
+      catch {
+        case e: Throwable => networkManager.addMessage("Error, close socket!!! \n" + e.getMessage)
+      }
+    }
+  }
+}

@@ -1,7 +1,9 @@
 package gui;
 
-import entity.User;
+import network.NetworkManager;
+import network.User;
 import network.Client;
+import protocols.denningsacco.DenningSacco;
 //import protocols.denningsacco.DenningSacco;
 
 import javax.swing.*;
@@ -31,6 +33,7 @@ public class MainFrame extends JFrame {
     private JTextField inputMessageField;
     private JButton inputMessageButton;
     private User user;
+    private NetworkManager networkManager;
     MainFrame mainFrame;
 
     Client client;
@@ -68,16 +71,16 @@ public class MainFrame extends JFrame {
                 messagesPane.setText("Please first sign in!");
                 return;
             }
-
+            networkManager = new NetworkManager(user, messagesPane.getStyledDocument());
             connectionButton.setEnabled(false);
             addMessage(user.login() + " connection...");
 
             if (user.login().equalsIgnoreCase("trent")) {
                 inputMessageField.setEnabled(false);
-//                DenningSacco.startServer(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
+                DenningSacco.start(true, Integer.parseInt(portField.getText()), 3, addressField.getText(),networkManager, mainFrame);
             } else {
                 try {
-//                    client = DenningSacco.startClient(user, Integer.parseInt(portField.getText()), 3, addressField.getText(), messagesPane, mainFrame);
+                    client = DenningSacco.start(false, Integer.parseInt(portField.getText()), 3, addressField.getText(), networkManager, mainFrame);
                 } catch (NullPointerException excp) {
                     connectionButton.setEnabled(true);
                     addMessage("Error, can't connection! \nPlease, try connection again.");

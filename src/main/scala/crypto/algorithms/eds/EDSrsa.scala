@@ -1,4 +1,4 @@
-package crypto.algorithms.hash
+package crypto.algorithms.eds
 
 import crypto.algorithms.extra.{PrivateKey, PublicKey}
 import crypto.algorithms.rsa.RSA
@@ -15,5 +15,7 @@ object EDSrsa {
     val signed = RSA.decrypt(decryptMSG, publicKeySource)
     msg.sameElements(signed)
   }
+
+
 }
 

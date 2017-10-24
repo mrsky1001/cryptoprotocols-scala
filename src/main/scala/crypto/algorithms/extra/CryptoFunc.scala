@@ -1,5 +1,7 @@
 package crypto.algorithms.extra
 
+import crypto.algorithms.rsa.ConfRSA
+
 import scala.annotation.tailrec
 
 trait CryptoFunc extends ExtraFunc {
@@ -21,6 +23,8 @@ trait CryptoFunc extends ExtraFunc {
 
   def generatePrime(min: Int, max: Int, p: Int = 0): Int = {
     var a = random(min, max)
+    if(min == 1 && max == 1)
+      return 2
     while (a < 2 || a % 2 == 0 || a == p || !isPrime(a))
       a = random(min, max)
     a
@@ -28,14 +32,14 @@ trait CryptoFunc extends ExtraFunc {
 
   def powMod(x: Array[Byte], y: Int, mod: Int): Array[Byte] = {
     x.map { byte =>
-      var b = byte.toInt
-      if (b < 0)
-        b = 128 * 2 + byte
+//      var b = byte.toInt
+//      if (b < 0)
+//        b = ConfRSA().keySize + byte
 
-      var z = b
+      var z = byte.toInt
       var n = y - 1
       while (n > 0) {
-        z = (z * b) % mod
+        z = (z * byte.toInt) % mod
         n -= 1
       }
       z.toByte

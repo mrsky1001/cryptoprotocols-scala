@@ -4,6 +4,7 @@ import network.NetworkManager;
 import network.User;
 import network.Client;
 import protocols.denningsacco.DenningSacco;
+import protocols.protocol2.Protocol1_2;
 //import protocols.denningsacco.DenningSacco;
 
 import javax.swing.*;
@@ -77,10 +78,12 @@ public class MainFrame extends JFrame {
 
             if (user.login().equalsIgnoreCase("trent")) {
                 inputMessageField.setEnabled(false);
-                DenningSacco.start(true, Integer.parseInt(portField.getText()), 3, addressField.getText(),networkManager, mainFrame);
+                //DenningSacco.start(true, Integer.parseInt(portField.getText()), 3, addressField.getText(),networkManager, mainFrame);
+                Protocol1_2.start(true, Integer.parseInt(portField.getText()), 3, addressField.getText(),networkManager, mainFrame);
             } else {
                 try {
-                    client = DenningSacco.start(false, Integer.parseInt(portField.getText()), 3, addressField.getText(), networkManager, mainFrame);
+//                    client = DenningSacco.start(false, Integer.parseInt(portField.getText()), 3, addressField.getText(), networkManager, mainFrame);
+                    client = Protocol1_2.start(false, Integer.parseInt(portField.getText()), 3, addressField.getText(), networkManager, mainFrame);
                 } catch (NullPointerException excp) {
                     connectionButton.setEnabled(true);
                     addMessage("Error, can't connection! \nPlease, try connection again.");

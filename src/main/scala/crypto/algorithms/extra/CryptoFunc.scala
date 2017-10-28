@@ -7,9 +7,11 @@ import scala.annotation.tailrec
 trait CryptoFunc extends ExtraFunc {
   val isPrime = (p: Int) => (factorize(p).sum + 1).equals(p + 1)
 
-  def encrypt(msg: Array[Byte], cryptoKey: CryptoKey): Array[Byte]
+  def encrypt(msg: Int, cryptoKey: CryptoKey): Int
+//  def encrypt(msg: Array[Byte], cryptoKey: CryptoKey): Array[Byte]
 
-  def decrypt(encryptedMSG: Array[Byte], cryptoKey: CryptoKey): Array[Byte]
+//  def decrypt(encryptedMSG: Array[Byte], cryptoKey: CryptoKey): Array[Byte]
+  def decrypt(encryptedMSG: Int, cryptoKey: CryptoKey): Int
 
   def inverse(a: Int, m: Int): Int = {
     def modInv(a: Int, m: Int, x: Int = 1, y: Int = 0): Int = if (m == 0) x else modInv(m, a % m, y, x - y * (a / m))
@@ -30,22 +32,30 @@ trait CryptoFunc extends ExtraFunc {
     a
   }
 
-  def powMod(x: Array[Byte], y: Int, mod: Int): Array[Byte] = {
-    x.map { byte =>
-      var b = byte.toInt
-      while (b < 0)
-        b = 128 * 2 + b
-
-      var z = b
-      var n = y - 1
-      while (n > 0) {
-        z = (z * b) % mod
-        n -= 1
-      }
-      z.toByte
+//  def powMod(x: Array[Byte], y: Int, mod: Int): Array[Byte] = {
+//    x.map { byte =>
+//      var b = byte.toInt
+//      while (b < 0)
+//        b = 128 * 2 + b
+//
+//      var z = b
+//      var n = y - 1
+//      while (n > 0) {
+//        z = (z * b) % mod
+//        n -= 1
+//      }
+//      z.toByte
+//    }
+//  }
+def powMod(x: Int, y: Int, mod: Int): Int= {
+    var z = x
+    var n = y - 1
+    while (n > 0) {
+      z = (z * x) % mod
+      n -= 1
     }
-  }
-
+    z
+}
   def isHaveInverseElement(e: Int, mod: Int): Boolean = {
     val d = inverse(e, mod)
     (e * d % mod).equals(1)

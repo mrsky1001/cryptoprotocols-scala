@@ -22,7 +22,7 @@ object Server {
         val idClient = if (sessions.nonEmpty) OrderSessions.BOB else OrderSessions.ALICE
         actors.Actor.actor {
           ps.println("[num] = " + idClient)
-          ps.println("[iam] = " + OrderSessions.TRENT)
+          ps.println("[iam] = " + OrderSessions.BOB)
 
           sessions += Session(idClient.toString, socket, bs, ps)
         }

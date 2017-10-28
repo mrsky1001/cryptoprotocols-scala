@@ -8,10 +8,10 @@ class GammaTest extends FunSpec with ExtraFunc {
     val sessionKey = SessionKey(77)
     println(sessionKey)
 
-    val encMSG = new Message(Gamma.encrypt(msg.getBytes, sessionKey))
+    val encMSG = new Message(Gamma.encrypt(msg.getBytes, sessionKey.key))
     println(encMSG)
 
-    val decMSG = new Message(Gamma.decrypt(encMSG.getBytes, sessionKey))
+    val decMSG = new Message(Gamma.decrypt(encMSG.getBytes, sessionKey.key))
     println(decMSG)
 
     assert(msg.equals(decMSG))

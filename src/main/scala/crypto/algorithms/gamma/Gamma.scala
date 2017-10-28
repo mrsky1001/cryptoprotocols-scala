@@ -1,17 +1,15 @@
 package crypto.algorithms.gamma
 
-import crypto.algorithms.extra.SessionKey
-
 object Gamma {
-  def encrypt(msg: Array[Byte], sessionKey: SessionKey): Array[Byte] = {
+  def encrypt(msg: Array[Byte], sessionKey: Int): Array[Byte] = {
     msg.map(symbol => {
-      (symbol ^ sessionKey.key).toByte
+      (symbol ^ sessionKey).toByte
     })
   }
 
-  def decrypt(msg: Array[Byte], sessionKey: SessionKey): Array[Byte] = {
+  def decrypt(msg: Array[Byte], sessionKey: Int): Array[Byte] = {
     msg.map(symbol => {
-      (symbol ^ sessionKey.key).toByte
+      (symbol ^ sessionKey).toByte
     })
   }
 }

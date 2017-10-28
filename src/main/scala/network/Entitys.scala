@@ -5,6 +5,7 @@ import java.net.Socket
 
 case class User(login: String, password: String) {
   var access: Boolean = false
+  var sessionKey: Int = 1
 }
 
 object OrderSessions extends Enumeration {
@@ -14,7 +15,8 @@ object OrderSessions extends Enumeration {
 
 object Commands extends Enumeration {
   type Commands = Value
-  val publicKey, AB, signPublicKeyBob, signPublicKeyTrent, sessionKey, sendBytes = Value
+//  val publicKey, AB, signPublicKeyBob, signPublicKeyTrent, sessionKey, sendBytes = Value
+  val CARDS, SELECTEDCARDS, SELECTED2CARDS = Value
 }
 
 case class Session(idSession: String, sock: Socket, bs: BufferedReader, ps: PrintStream, sessionKey: Option[Int] = null)

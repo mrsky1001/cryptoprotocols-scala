@@ -1,10 +1,11 @@
 package gui;
 
+import crypto.algorithms.extra.Message;
+import crypto.algorithms.gamma.Gamma;
 import network.NetworkManager;
 import network.User;
 import network.Client;
-import protocols.denningsacco.DenningSacco;
-import protocols.protocol2.Protocol1_2;
+import protocols.mentalpoker.MentalPoker;
 //import protocols.denningsacco.DenningSacco;
 
 import javax.swing.*;
@@ -76,14 +77,12 @@ public class MainFrame extends JFrame {
             connectionButton.setEnabled(false);
             addMessage(user.login() + " connection...");
 
-            if (user.login().equalsIgnoreCase("trent")) {
+            if (user.login().equalsIgnoreCase("bob")) {
                 inputMessageField.setEnabled(false);
-                //DenningSacco.start(true, Integer.parseInt(portField.getText()), 3, addressField.getText(),networkManager, mainFrame);
-                Protocol1_2.start(true, Integer.parseInt(portField.getText()), 3, addressField.getText(),networkManager, mainFrame);
+                MentalPoker.start(true, Integer.parseInt(portField.getText()), 3, addressField.getText(),networkManager, mainFrame);
             } else {
                 try {
-//                    client = DenningSacco.start(false, Integer.parseInt(portField.getText()), 3, addressField.getText(), networkManager, mainFrame);
-                    client = Protocol1_2.start(false, Integer.parseInt(portField.getText()), 3, addressField.getText(), networkManager, mainFrame);
+                    client = MentalPoker.start(false, Integer.parseInt(portField.getText()), 3, addressField.getText(), networkManager, mainFrame);
                 } catch (NullPointerException excp) {
                     connectionButton.setEnabled(true);
                     addMessage("Error, can't connection! \nPlease, try connection again.");
@@ -94,6 +93,8 @@ public class MainFrame extends JFrame {
 
     private void sendMessage() {
         if (user != null && user.access()) {
+
+            Gamma.encrypt(new Message(inputMessageField.getText()).getBytes(), user.sessionKey());
             networkManager.addMessage(inputMessageField.getText(), false);
             if (client != null)
                 client.sendMessage(inputMessageField.getText());
